@@ -7,13 +7,14 @@ from dotenv import load_dotenv
 from youtube_client import YouTubeClient
 from urllib.parse import urlparse, parse_qs
 from spotify_client import SpotifyClient
+from config import app
 
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 CREDS_PATH = os.path.join(CURRENT_DIR, 'creds', 'client_secret.json')
 
 app = Flask(__name__)
 
-app.secret_key = '5bvrhjg4-g48n3ug-nrjg5g-G03g'
+app.secret_key = os.getenv('SECRET_KEY')
 
 load_dotenv(override=True)
 
