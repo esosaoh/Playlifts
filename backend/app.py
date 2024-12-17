@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from youtube_client import YouTubeClient
 from urllib.parse import urlparse, parse_qs
 from spotify_client import SpotifyClient
-from config import app
+from config import app, db
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 CREDS_PATH = os.path.join(CURRENT_DIR, 'creds', 'client_secret.json')
@@ -149,5 +149,7 @@ def process_youtube():
         return jsonify({"error": str(e)}), 400
 
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(port=8889, debug=True)
     
