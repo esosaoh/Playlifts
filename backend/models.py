@@ -1,7 +1,7 @@
 from config import db
 import datetime
 
-class Migrations(db.model):
+class Migrations(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     spotify_user_id = db.Column(db.String(200), nullable=False)
     track_id = db.Column(db.String(200), nullable=False)
