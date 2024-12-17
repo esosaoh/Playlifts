@@ -147,6 +147,26 @@ def process_youtube():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+    
+def get_user_id():
+    if 'access_token' not in session:
+        return None 
+    headers = {
+        'Authorization': f"Bearer {session['access_token']}"
+    }
+    user_response = requests.get('https://api.spotify.com/v1/me', headers=headers)
+    if user_response.status_code != 200:
+        return None 
+    user_data = user_response.json()
+    
+    return user_data.get('id')
+
+@app.route('/migrations', methods = ['GET'])
+def get_migrations():
+    if 'access_token' not in session:
+        return redirect(url_for('login'))
+
+
 
 if __name__ == '__main__':
     with app.app_context():
