@@ -1,5 +1,5 @@
 from config import db
-import datetime
+from datetime import datetime
 
 class Migration(db.Model):
     id = db.Column(db.Integer, primary_key=True)
