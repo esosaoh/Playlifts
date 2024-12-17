@@ -8,11 +8,10 @@ from youtube_client import YouTubeClient
 from urllib.parse import urlparse, parse_qs
 from spotify_client import SpotifyClient
 from config import app, db
+import models
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 CREDS_PATH = os.path.join(CURRENT_DIR, 'creds', 'client_secret.json')
-
-app = Flask(__name__)
 
 app.secret_key = os.getenv('SECRET_KEY')
 
@@ -117,6 +116,7 @@ def process_youtube():
             try:
                 spotify_song_id = spotify_client.search_song(song.artist, song.track)
                 if spotify_client.add_song_to_spotify(spotify_song_id):
+                    models.add_migration(session['access_token'], spotify_song_id)
                     successful_transfers.append({
                         'artist': song.artist,
                         'track': song.track
