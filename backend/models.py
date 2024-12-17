@@ -1,7 +1,7 @@
 from config import db
 import datetime
 
-class Migrations(db.Model):
+class Migration(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     spotify_user_id = db.Column(db.String(120), nullable=False, index=True)
     track_id = db.Column(db.String(120), nullable=False)
@@ -19,7 +19,7 @@ class Migrations(db.Model):
         }
     
 def add_migration(spotify_user_id, track_id):
-    migration = Migrations(
+    migration = Migration(
         spotify_user_id=spotify_user_id,
         track_id=track_id,
         migrated_at=datetime.utcnow()
