@@ -50,11 +50,11 @@ def login():
 @app.route('/callback')
 def callback():
     if 'error' in request.args:
-        return render_template('index.html', error=request.args['error'])
-
+         return jsonify({"status": "error", "message": request.args['error']}), 400
+    
     if 'code' not in request.args:
-        return redirect(url_for('login'))
-
+        return jsonify({"status": "error", "message": "Authorization code not found"}), 400
+    
     try:
         auth_code = request.args['code']
 
@@ -70,23 +70,22 @@ def callback():
         response = requests.post(TOKEN_URL, data=req_body)
 
         if response.status_code != 200:
-            return render_template('index.html', 
-                error=f"Token request failed with status {response.status_code}")
+            return jsonify({"status": "error", "message": f"Token request failed with status {response.status_code}"}), 400
 
         token_info = response.json()
         
         if 'access_token' not in token_info:
             error_msg = f"No access token in response. Response: {token_info}"
-            return render_template('index.html', error=error_msg)
+            return jsonify({"status": "error", "message": error_msg}), 400
 
         session['access_token'] = token_info['access_token']
         session['refresh_token'] = token_info['refresh_token']
         session['expires_at'] = datetime.now().timestamp() + token_info['expires_in']
 
-        return redirect(url_for('index'))
+        return jsonify({"status": "success", "message": "Authorization successful"}), 200
 
     except Exception as e:
-        return render_template('index.html', error=str(e))
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/process-youtube', methods=['POST'])
 def process_youtube():
