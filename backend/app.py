@@ -9,6 +9,7 @@ from urllib.parse import urlparse, parse_qs
 from spotify_client import SpotifyClient
 from config import app, db
 import models
+from models import Migration
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 CREDS_PATH = os.path.join(CURRENT_DIR, 'creds', 'client_secret.json')
@@ -158,16 +159,24 @@ def get_user_id():
     if user_response.status_code != 200:
         return None 
     user_data = user_response.json()
-    
+
     return user_data.get('id')
 
 @app.route('/migrations', methods = ['GET'])
 def get_migrations():
     if 'access_token' not in session:
         return redirect(url_for('login'))
+    
+    spotify_user_id = get_user_id()
+    if not spotify_user_id:
+        return jsonify({"error": "Spotify user ID not found"}), 400
+    
+    migrations = Migration.query.filter_by(spotify_user_id=spotify_user_id).all()
 
+    json_migrations = [migration.to_json() for migration in migrations]
 
-
+    return jsonify({"migrations": json_migrations})
+    
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
