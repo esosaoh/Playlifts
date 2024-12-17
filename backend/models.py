@@ -3,12 +3,20 @@ import datetime
 
 class Migrations(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    spotify_user_id = db.Column(db.String(200), nullable=False)
-    track_id = db.Column(db.String(200), nullable=False)
+    spotify_user_id = db.Column(db.String(120), nullable=False)
+    track_id = db.Column(db.String(120), nullable=False)
     migrated_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return f"<Migration {self.spotify_user_id} - {self.track_id}>"
+    
+    def to_json(self):
+        return {
+            "id": self.id,
+            "spotifyUserId": self.spotify_user_id,
+            "trackId": self.track_id,
+            "migratedAt": self.migrated_at
+        }
     
 def add_migration(spotify_user_id, track_id):
     migration = Migrations(
