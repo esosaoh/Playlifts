@@ -3,7 +3,7 @@ import datetime
 
 class Migrations(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    spotify_user_id = db.Column(db.String(120), nullable=False)
+    spotify_user_id = db.Column(db.String(120), nullable=False, index=True)
     track_id = db.Column(db.String(120), nullable=False)
     migrated_at = db.Column(db.DateTime, default=datetime.utcnow)
 
