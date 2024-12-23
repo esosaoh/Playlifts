@@ -70,20 +70,3 @@ npm start
 2. Log in with your Spotify account
 3. Select a YouTube playlist to transfer
 4. Review and add tracks to your Spotify playlists
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-   ```bash
-   git checkout -b feature/awesome-feature
-   ```
-3. Commit your changes
-   ```bash
-   git commit -m 'Add some awesome feature'
-   ```
-4. Push to the branch
-   ```bash
-   git push origin feature/awesome-feature
-   ```
-5. Open a Pull Request
