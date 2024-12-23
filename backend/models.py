@@ -1,28 +1,22 @@
 from config import db
 from datetime import datetime
 
-class Migration(db.Model):
+class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    spotify_user_id = db.Column(db.String(120), nullable=False, index=True)
-    track_id = db.Column(db.String(120), nullable=False)
-    migrated_at = db.Column(db.DateTime, default=datetime.utcnow)
+    spotify_id = db.Column(db.String(120), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_login = db.Column(db.DateTime)
+    spotify_token = db.Column(db.JSON)
 
     def __repr__(self):
-        return f"<Migration {self.spotify_user_id} - {self.track_id}>"
+        return f"<User {self.spotify_id}>"
     
-    def to_json(self):
+    def to_dict(self):
         return {
             "id": self.id,
-            "spotifyUserId": self.spotify_user_id,
-            "trackId": self.track_id,
-            "migratedAt": self.migrated_at
+            "spotify_id": self.spotify_id,
+            "email": self.email,
+            "created_at": self.created_at,
+            "last_login": self.last_login
         }
-    
-def add_migration(spotify_user_id, track_id):
-    migration = Migration(
-        spotify_user_id=spotify_user_id,
-        track_id=track_id,
-        migrated_at=datetime.utcnow()
-    )
-    db.session.add(migration)
-    db.session.commit()
