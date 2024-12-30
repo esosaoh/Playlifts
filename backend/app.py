@@ -162,7 +162,6 @@ def get_user_id():
 
 @app.route('/check_login', methods=['GET'])
 def check_login():
-
     is_logged_in = session.get('is_logged_in', False)
     return jsonify({'is_logged_in': is_logged_in}), 200
     
