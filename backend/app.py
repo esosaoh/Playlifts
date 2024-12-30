@@ -83,7 +83,12 @@ def callback():
         session['is_logged_in'] = True
 
         #return jsonify({"status": "success", "message": "Authorization successful"}), 200
-        return redirect('http://localhost:5173')
+        response = redirect('http://localhost:5173')
+        response.set_cookie('is_logged_in', 'true', 
+                          samesite='Lax',
+                          secure=False,
+                          httponly=False)
+        return response
     
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
