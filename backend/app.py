@@ -44,7 +44,7 @@ def login():
     }
 
     auth_url = f"{AUTH_URL}?{urllib.parse.urlencode(params)}"
-    return redirect(auth_url)
+    return jsonify({"auth_url": auth_url})
 
 @app.route('/callback')
 def callback():
