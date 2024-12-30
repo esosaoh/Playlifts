@@ -82,8 +82,9 @@ def callback():
         session['expires_at'] = datetime.now().timestamp() + token_info['expires_in']
         session['is_logged_in'] = True
 
-        return jsonify({"status": "success", "message": "Authorization successful"}), 200
-
+        #return jsonify({"status": "success", "message": "Authorization successful"}), 200
+        return redirect('http://localhost:5173')
+    
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
