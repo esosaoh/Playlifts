@@ -14,8 +14,8 @@ A full-stack web application for transferring tracks from YouTube playlists to S
 
 ## Tech Stack
 
-- **Backend**: Python (Flask), Spotify API, YouTube Data API
-- **Frontend**: HTML, CSS, JavaScript
+- **Backend**: Python (Flask), MySQL, Spotify API, YouTube Data API
+- **Frontend**: React.js, TypeScript, Tailwing CSS
 - **Authentication**: OAuth 2.0 with Spotify
 
 ## Prerequisites
