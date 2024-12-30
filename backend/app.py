@@ -159,6 +159,12 @@ def get_user_id():
     user_data = user_response.json()
 
     return user_data.get('id')
+
+@app.route('/check_login', methods=['GET'])
+def check_login():
+
+    is_logged_in = session.get('is_logged_in', False)
+    return jsonify({'is_logged_in': is_logged_in}), 200
     
 if __name__ == '__main__':
     #with app.app_context():
