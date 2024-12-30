@@ -9,7 +9,6 @@ from urllib.parse import urlparse, parse_qs
 from spotify_client import SpotifyClient
 from config import app, db
 import models
-from models import Migration
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 CREDS_PATH = os.path.join(CURRENT_DIR, 'creds', 'client_secret.json')
@@ -81,6 +80,7 @@ def callback():
         session['access_token'] = token_info['access_token']
         session['refresh_token'] = token_info['refresh_token']
         session['expires_at'] = datetime.now().timestamp() + token_info['expires_in']
+        session['is_logged_in'] = True
 
         return jsonify({"status": "success", "message": "Authorization successful"}), 200
 
@@ -116,7 +116,6 @@ def process_youtube():
             try:
                 spotify_song_id = spotify_client.search_song(song.artist, song.track)
                 if spotify_client.add_song_to_spotify(spotify_song_id):
-                    models.add_migration(session['access_token'], spotify_song_id)
                     successful_transfers.append({
                         'artist': song.artist,
                         'track': song.track
@@ -160,24 +159,9 @@ def get_user_id():
     user_data = user_response.json()
 
     return user_data.get('id')
-
-@app.route('/migrations', methods = ['GET'])
-def get_migrations():
-    if 'access_token' not in session:
-        return redirect(url_for('login'))
-    
-    spotify_user_id = get_user_id()
-    if not spotify_user_id:
-        return jsonify({"error": "Spotify user ID not found"}), 400
-    
-    migrations = Migration.query.filter_by(spotify_user_id=spotify_user_id).all()
-
-    json_migrations = [migration.to_json() for migration in migrations]
-
-    return jsonify({"migrations": json_migrations})
     
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
+    #with app.app_context():
+     #   db.create_all()
     app.run(port=8889, debug=True)
     
