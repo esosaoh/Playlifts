@@ -5,3 +5,8 @@ SQLAlchemy==2.0.36
 mysql-connector-python==9.1.0
 gunicorn==23.0.0
 requests==2.32.3
+google-api-python-client==2.138.0
+google-auth==2.32.0
+google-auth-oauthlib==1.2.1
+spotipy==2.24.0
+urllib3==2.2.2
