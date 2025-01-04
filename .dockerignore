@@ -18,3 +18,4 @@ tests/
 htmlcov/
 .tox/
 .idea/
+node_modules
