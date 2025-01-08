@@ -8,22 +8,22 @@ A full-stack web application for transferring tracks from YouTube playlists to S
 
 ## Features
 
-- **Spotify Playlist Transfer**: Fetch tracks from your public YouTube playlists and add them to your Spotify library.
-- **Playlist Management**: Search for tracks on Spotify and create or modify your personal playlists.
-- **User Authentication**: Secure OAuth-based authentication for Spotify users to log in and manage their music collections.
+- **Spotify Playlist Transfer**: Fetch tracks from your public YouTube playlists and add them to your Spotify library
+- **Playlist Management**: Search for tracks on Spotify and create or modify your personal playlists
+- **User Authentication**: Secure OAuth-based authentication for Spotify users to log in and manage their music collections
 
 ## Tech Stack
 
 - **Backend**: Python (Flask), MySQL, Spotify API, YouTube Data API
-- **Frontend**: React.js, TypeScript, Tailwing CSS
+- **Frontend**: React.js, TypeScript, Tailwind CSS
 - **Authentication**: OAuth 2.0 with Spotify
+- **Containerization**: Docker, Docker Compose
 
 ## Prerequisites
 
-1. Python 3.7 or higher
-2. Node.js
-3. Spotify Developer Account
-4. YouTube Data API v3 Credentials
+- Docker and Docker Compose
+- Spotify Developer Account
+- YouTube Data API v3 Credentials
 
 ## Setup Instructions
 
@@ -34,15 +34,9 @@ git clone https://github.com/esosaoh/ListenUP.git
 cd ListenUP
 ```
 
-### 2. Install Python Dependencies
+### 2. Configure Environment Variables
 
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Configure Environment Variables
-
-Create a `.env` file in the backend directory:
+Create a `.env` file in the root directory:
 
 ```plaintext
 SPOTIFY_CLIENT_ID=your_spotify_client_id
@@ -50,19 +44,20 @@ SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
 YOUTUBE_API_KEY=your_youtube_api_key
 ```
 
-### 4. Run the Backend
+### 3. Build and Run with Docker
 
 ```bash
-python backend/app.py
+# Build and start all services
+docker-compose up --build
+
+# To run in detached mode
+docker-compose up -d
 ```
 
-### 5. Setup Frontend
+### 5. Access the application
 
-```bash
-cd frontend
-npm install
-npm start
-```
+1. Frontend: http://localhost:5173
+2. Backend API: http://localhost:8889
 
 ## Usage
 
