@@ -1,5 +1,5 @@
 import requests
-from flask import Flask, redirect, url_for, request, session, jsonify, render_template
+from flask import redirect, url_for, request, session, jsonify, render_template
 import os
 import urllib.parse
 from datetime import datetime
@@ -7,8 +7,7 @@ from dotenv import load_dotenv
 from youtube_client import YouTubeClient
 from urllib.parse import urlparse, parse_qs
 from spotify_client import SpotifyClient
-from config import app, db
-import models
+from config import app
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 CREDS_PATH = os.path.join(CURRENT_DIR, 'creds', 'client_secret.json')
@@ -172,7 +171,5 @@ def check_login():
     return jsonify({'is_logged_in': is_logged_in}), 200
     
 if __name__ == '__main__':
-    #with app.app_context():
-     #   db.create_all()
     app.run(port=8889, debug=False)
     
