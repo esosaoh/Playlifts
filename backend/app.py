@@ -64,7 +64,6 @@ def callback():
             'client_secret': CLIENT_SECRET,
         }
 
-        
         response = requests.post(TOKEN_URL, data=req_body)
 
         if response.status_code != 200:
