@@ -1,0 +1,6 @@
+dist/
+build/
+node_modules/
+*.tsbuildinfo
+*.min.js
+*.min.css
