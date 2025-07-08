@@ -1,101 +1,100 @@
-import { useState, useEffect } from 'react'
+import { useIsLoggedIn } from './hooks/useIsLoggedIn'
+import { Button } from './components/ui/Button'
+import { Header } from './components/layout/Header'
+import { PlaylistTransfer } from './components/features/PlaylistTransfer'
+import { motion } from 'framer-motion'
+import { Music, Music2 } from 'lucide-react'
+import { useEffect, useState, useLayoutEffect } from 'react'
+import { SunIcon, MoonIcon } from '@heroicons/react/24/outline'
 
-function App() {
-  const [youtubeUrl, setYoutubeUrl] = useState('')
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-
+function LoginPage() {
+  const [dark, setDark] = useState(true)
   useEffect(() => {
-    checkLoginStatus()
-  }, [])
-
-  const checkLoginStatus = async () => {
-    try {
-      const response = await fetch('http://localhost:8889/check_login', {
-        credentials: 'include'
-      })
-      if (response.ok) {
-        const data = await response.json()
-        setIsLoggedIn(data.is_logged_in)
-      }
-    } catch (error) {
-      console.error('Failed to check login status:', error)
-    }
-  }
-  const handleSpotifyLogin = async () => {
-    try {
-      const response = await fetch('http://localhost:8889/login')
-      if (response.ok) {
-        const data = await response.json()
-        window.location.href = data.auth_url
-      }
-    } catch (error) {
-      console.error('Login failed:', error)
-    }
-  }
-
-  const handleSubmitPlaylist = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    try {
-      const response = await fetch('http://localhost:8889/process-youtube', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url: youtubeUrl }),
-        credentials: 'include'
-      })
-      if (response.ok) {
-        alert('Playlist transferred successfully!')
-        setYoutubeUrl('')
-      }
-    } catch (error) {
-      console.error('Processing failed:', error)
-    }
+    document.documentElement.classList.toggle('dark', dark)
+  }, [dark])
+  const handleLogin = async () => {
+    const res = await fetch('http://localhost:8889/login')
+    const data = await res.json()
+    window.location.href = data.auth_url
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4">
-      <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-8">
-        <h1 className="text-3xl font-bold text-center mb-4">ListenUp</h1>
-        
-        <p className="text-gray-600 mb-8 text-center">
-          Transfer songs from your favorite YouTube playlists to Spotify with just one click. 
-          Login with Spotify to get started!
-        </p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+        className="text-center space-y-8 max-w-md"
+      >
+        <motion.div
+          initial={{ scale: 0.8 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl shadow-2xl"
+        >
+          <Music className="w-10 h-10 text-white" />
+        </motion.div>
 
-        {!isLoggedIn ? (
+        <div className="space-y-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
+            ListenUP
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-300">
+            Transfer your YouTube Music playlists to Spotify seamlessly
+          </p>
+        </div>
+
+        <div className="flex justify-center mb-4">
           <button
-            onClick={handleSpotifyLogin}
-            className="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition"
+            aria-label="Toggle theme"
+            onClick={() => setDark((d) => !d)}
+            className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition shadow"
           >
-            Login with Spotify
+            {dark ? (
+              <SunIcon className="w-6 h-6 text-yellow-400" />
+            ) : (
+              <MoonIcon className="w-6 h-6 text-gray-600" />
+            )}
           </button>
-        ) : (
-          <form onSubmit={handleSubmitPlaylist} className="space-y-4">
-            <div>
-              <label htmlFor="playlist" className="block text-sm font-medium text-gray-700">
-                YouTube Playlist URL
-              </label>
-              <input
-                id="playlist"
-                type="text"
-                value={youtubeUrl}
-                onChange={(e) => setYoutubeUrl(e.target.value)}
-                placeholder="Paste your YouTube playlist URL here"
-                className="mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
-            >
-              Convert Playlist
-            </button>
-          </form>
-        )}
-      </div>
+        </div>
+
+        <Button
+          onClick={handleLogin}
+          size="lg"
+          className="w-full text-lg py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg"
+        >
+          <Music2 className="w-5 h-5" />
+          Login with Spotify
+        </Button>
+      </motion.div>
     </div>
   )
-};
+}
+
+function App() {
+  useLayoutEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
+  const isLoggedIn = useIsLoggedIn()
+
+  if (isLoggedIn === null) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      </div>
+    )
+  }
+
+  if (!isLoggedIn) return <LoginPage />
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <Header />
+      <main>
+        <PlaylistTransfer />
+      </main>
+    </div>
+  )
+}
 
 export default App
