@@ -8,3 +8,7 @@ node_modules/
 *.log
 backend/creds/client_secret.json
 backend/creds/client_secrets.json
+create_db.py
+flask_session/
+.flask_session/
+*.tsbuildinfo
