@@ -4,8 +4,14 @@ import { Header } from './components/layout/Header'
 import { PlaylistTransfer } from './components/features/PlaylistTransfer'
 import { motion } from 'framer-motion'
 import { Music, Music2 } from 'lucide-react'
+import { useEffect, useState, useLayoutEffect } from 'react'
+import { SunIcon, MoonIcon } from '@heroicons/react/24/outline'
 
 function LoginPage() {
+  const [dark, setDark] = useState(true)
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark)
+  }, [dark])
   const handleLogin = async () => {
     const res = await fetch('http://localhost:8889/login')
     const data = await res.json()
@@ -34,8 +40,22 @@ function LoginPage() {
             ListenUP
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300">
-            Transfer your YouTube playlists to Spotify seamlessly
+            Transfer your YouTube Music playlists to Spotify seamlessly
           </p>
+        </div>
+
+        <div className="flex justify-center mb-4">
+          <button
+            aria-label="Toggle theme"
+            onClick={() => setDark((d) => !d)}
+            className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition shadow"
+          >
+            {dark ? (
+              <SunIcon className="w-6 h-6 text-yellow-400" />
+            ) : (
+              <MoonIcon className="w-6 h-6 text-gray-600" />
+            )}
+          </button>
         </div>
 
         <Button
@@ -52,6 +72,9 @@ function LoginPage() {
 }
 
 function App() {
+  useLayoutEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
   const isLoggedIn = useIsLoggedIn()
 
   if (isLoggedIn === null) {

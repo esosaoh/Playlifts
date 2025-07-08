@@ -49,20 +49,20 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       size,
       asChild = false,
       loading = false,
-      children,
+  children,
       disabled,
-      ...props
+  ...props
     },
     ref
   ) => {
     const Comp = asChild ? Slot : 'button'
-    return (
+  return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         disabled={disabled || loading}
-        {...props}
-      >
+      {...props}
+    >
         {loading && (
           <svg
             className="animate-spin -ml-1 mr-2 h-4 w-4"
@@ -85,10 +85,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             ></path>
           </svg>
         )}
-        {children}
+      {children}
       </Comp>
-    )
-  }
+  )
+}
 )
 Button.displayName = 'Button'
 

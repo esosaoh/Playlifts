@@ -47,10 +47,10 @@ export const PlaylistTransfer = () => {
         setSongs(allSongs)
         setProgress(100)
       } else {
-        setError(data.error || 'Transfer failed.')
+        setError('Could not process this playlist. Please check your YouTube Music link and try again.')
       }
     } catch (e: any) {
-      setError(e.message || 'Unknown error')
+      setError('Could not process this playlist. Please check your YouTube Music link and try again.')
     } finally {
       setIsTransferring(false)
     }
@@ -63,7 +63,7 @@ export const PlaylistTransfer = () => {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="max-w-2xl mx-auto"
+          className="max-w-4xl mx-auto"
         >
           {/* Hero Section */}
           <div className="text-center mb-12">
@@ -79,30 +79,31 @@ export const PlaylistTransfer = () => {
               Transfer Your Music
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-lg mx-auto">
-              Seamlessly move your YouTube playlists to Spotify with our
+              Seamlessly move your YouTube Music playlists to Spotify with our
               intelligent transfer system
             </p>
           </div>
 
           {/* Main Transfer Card */}
           <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-2xl">
-            <CardHeader className="text-center pb-4">
-              <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
-                YouTube to Spotify Transfer
+            <CardHeader className="text-center pb-4 flex flex-col items-center">
+              <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white w-full text-center">
+                YouTube Music to Spotify Transfer
               </CardTitle>
-              <CardDescription className="text-gray-600 dark:text-gray-300">
-                Paste your YouTube playlist URL below to get started
+              <CardDescription className="text-gray-600 dark:text-gray-300 w-full text-center">
+                Paste your YouTube Music playlist URL below to get started
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
+
+            <CardContent className="space-y-6 flex flex-col items-center w-full">
+              <div className="space-y-4 w-full">
                 <Input
-                  label="YouTube Playlist URL"
+                  label="YouTube Music Playlist URL"
                   value={url}
                   onChange={e => setUrl(e.target.value)}
-                  placeholder="https://www.youtube.com/playlist?list=..."
+                  placeholder="https://music.youtube.com/playlist?list=..."
                   disabled={isTransferring}
-                  className="text-lg"
+                  className="text-lg h-14 px-6 w-full border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 transition rounded-lg"
                 />
                 <Button
                   onClick={handleTransfer}
@@ -121,7 +122,7 @@ export const PlaylistTransfer = () => {
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
-                  className="space-y-4"
+                  className="space-y-4 w-full"
                 >
                   <ProgressBar value={progress} label="Transferring songs..." />
                   <div className="text-center text-sm text-gray-600 dark:text-gray-300">
@@ -134,7 +135,7 @@ export const PlaylistTransfer = () => {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-center"
+                  className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-center w-full"
                 >
                   {error}
                 </motion.div>
@@ -144,7 +145,7 @@ export const PlaylistTransfer = () => {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="space-y-3"
+                  className="space-y-3 w-full"
                 >
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     Transfer Results
