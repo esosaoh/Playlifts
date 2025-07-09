@@ -32,7 +32,7 @@ def index():
 
 @app.route('/login')
 def login():
-    scope = 'user-read-private user-read-email user-library-modify'
+    scope = 'user-read-private user-read-email user-library-modify playlist-read-private playlist-modify-public playlist-modify-private'
 
     params = {
         'client_id': CLIENT_ID,
@@ -91,6 +91,65 @@ def callback():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/get-playlists', methods=['GET'])
+def get_playlists():
+    if 'access_token' not in session:
+        return jsonify({"error": "Not authenticated"}), 401
+
+    try:
+        headers = {
+            'Authorization': f"Bearer {session['access_token']}"
+        }
+        
+        user_response = requests.get('https://api.spotify.com/v1/me', headers=headers)
+        if user_response.status_code != 200:
+            return jsonify({"error": "Failed to fetch user profile"}), 400
+            
+        user_data = user_response.json()
+        current_user_id = user_data['id']
+
+        all_playlists = []
+        offset = 0
+        limit = 50
+        
+        while True:
+            response = requests.get(f'https://api.spotify.com/v1/me/playlists?limit={limit}&offset={offset}', headers=headers)
+            
+            if response.status_code != 200:
+                return jsonify({"error": f"Failed to fetch playlists: {response.status_code}"}), 400
+                
+            playlists_data = response.json()
+            playlists = playlists_data['items']
+            
+            if not playlists:
+                break
+                
+            for playlist in playlists:
+                if playlist['owner']['id'] == current_user_id:
+                    cover_image = None
+                    if playlist.get('images') and len(playlist['images']) > 0:
+                        cover_image = playlist['images'][0]['url']
+                    
+                    playlist_info = {
+                        'id': playlist['id'],
+                        'name': playlist['name'],
+                        'tracks_count': playlist['tracks']['total'],
+                        'owner': playlist['owner']['display_name'],
+                        'public': playlist.get('public', False),
+                        'cover_image': cover_image
+                    }
+                    all_playlists.append(playlist_info)
+            
+            offset += limit
+            
+            if len(playlists) < limit:
+                break
+        
+        return jsonify({"playlists": all_playlists})
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/process-youtube', methods=['POST'])
 def process_youtube():
     if 'access_token' not in session:
@@ -98,7 +157,8 @@ def process_youtube():
 
     try:
         youtube_url = request.json['url']
-        # Extract playlist ID from URL
+        target_playlist_id = request.json.get('playlist_id') # if none, add to liked songs?
+        
         parsed_url = urlparse(youtube_url)
         if 'youtube.com' not in parsed_url.netloc:
             return jsonify({"error": "Not a valid YouTube URL"}), 400
@@ -119,7 +179,13 @@ def process_youtube():
         for song in songs:
             try:
                 spotify_song_id = spotify_client.search_song(song.artist, song.track)
-                if spotify_client.add_song_to_spotify(spotify_song_id):
+                
+                if target_playlist_id:
+                    success = spotify_client.add_song_to_playlist(spotify_song_id, target_playlist_id)
+                else:
+                    success = spotify_client.add_song_to_spotify(spotify_song_id)
+                
+                if success:
                     successful_transfers.append({
                         'artist': song.artist,
                         'track': song.track
@@ -168,6 +234,13 @@ def get_user_id():
 def check_login():
     is_logged_in = session.get('is_logged_in', False)
     return jsonify({'is_logged_in': is_logged_in}), 200
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    response = jsonify({"status": "success", "message": "Logged out successfully"})
+    response.delete_cookie('is_logged_in')
+    return response
     
 if __name__ == '__main__':
     app.run(port=8889, debug=False)

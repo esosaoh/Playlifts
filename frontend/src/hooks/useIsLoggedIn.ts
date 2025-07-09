@@ -4,10 +4,26 @@ export function useIsLoggedIn() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
 
   useEffect(() => {
-    fetch('http://localhost:8889/check_login', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => setIsLoggedIn(data.is_logged_in))
-      .catch(() => setIsLoggedIn(false))
+    const checkLogin = async () => {
+      try {
+        const timestamp = Date.now()
+        const response = await fetch(`http://localhost:8889/check_login?t=${timestamp}`, { 
+          credentials: 'include'
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          setIsLoggedIn(data.is_logged_in)
+        } else {
+          setIsLoggedIn(false)
+        }
+      } catch (error) {
+        console.error('Error checking login status:', error)
+        setIsLoggedIn(false)
+      }
+    }
+
+    checkLogin()
   }, [])
 
   return isLoggedIn

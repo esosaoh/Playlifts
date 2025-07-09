@@ -26,7 +26,6 @@ class User(db.Model):
         user = User.query.filter_by(spotify_id=spotify_id).first()
         if user:
             print(f"✅ User {email} already exists.")
-            # Optionally update the last login time or token
             user.last_login = datetime.utcnow()
             if access_token:
                 user.spotify_token = access_token

@@ -75,7 +75,18 @@ function App() {
   useLayoutEffect(() => {
     document.documentElement.classList.add('dark');
   }, []);
+  
   const isLoggedIn = useIsLoggedIn()
+
+  useEffect(() => {
+    if ('caches' in window) {
+      caches.keys().then(names => {
+        names.forEach(name => {
+          caches.delete(name);
+        });
+      });
+    }
+  }, []);
 
   if (isLoggedIn === null) {
     return (

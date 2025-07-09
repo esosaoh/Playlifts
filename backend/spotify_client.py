@@ -40,3 +40,18 @@ class SpotifyClient(object):
         )
         
         return response.ok
+    
+    def add_song_to_playlist(self, song_id, playlist_id):
+        url = f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks"
+        response = requests.post(
+            url,
+            json={
+                "uris": [f"spotify:track:{song_id}"]
+            },
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.api_token}"
+            }
+        )
+        
+        return response.ok
