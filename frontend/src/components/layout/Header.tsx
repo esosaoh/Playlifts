@@ -1,4 +1,4 @@
-import { SunIcon, MoonIcon } from '@heroicons/react/24/outline'
+import { SunIcon, MoonIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline'
 import { useState } from 'react'
 
 export const Header = () => {
@@ -9,6 +9,21 @@ export const Header = () => {
     document.documentElement.classList.toggle('dark', !dark)
   }
 
+  const handleLogout = async () => {
+    try {
+      await fetch('http://localhost:8889/logout', {
+        method: 'POST',
+        credentials: 'include'
+      })
+      // Force page reload to clear any cached state
+      window.location.reload()
+    } catch (error) {
+      console.error('Logout failed:', error)
+      // Still reload to force fresh state
+      window.location.reload()
+    }
+  }
+
   return (
     <header className="flex items-center justify-between px-8 py-4 bg-white dark:bg-gray-900 shadow-md rounded-b-2xl">
       <div className="flex items-center gap-2">
@@ -16,17 +31,26 @@ export const Header = () => {
           ListenUP
         </span>
       </div>
-      <button
-        aria-label="Toggle theme"
-        onClick={toggleTheme}
-        className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition shadow"
-      >
-        {dark ? (
-          <SunIcon className="w-6 h-6 text-yellow-400" />
-        ) : (
-          <MoonIcon className="w-6 h-6 text-gray-600" />
-        )}
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          aria-label="Toggle theme"
+          onClick={toggleTheme}
+          className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition shadow"
+        >
+          {dark ? (
+            <SunIcon className="w-6 h-6 text-yellow-400" />
+          ) : (
+            <MoonIcon className="w-6 h-6 text-gray-600" />
+          )}
+        </button>
+        <button
+          aria-label="Logout"
+          onClick={handleLogout}
+          className="p-2 rounded-full bg-red-100 dark:bg-red-900/20 hover:bg-red-200 dark:hover:bg-red-900/40 transition shadow text-red-600 dark:text-red-400"
+        >
+          <ArrowRightOnRectangleIcon className="w-6 h-6" />
+        </button>
+      </div>
     </header>
   )
 }

@@ -12,3 +12,5 @@ create_db.py
 flask_session/
 .flask_session/
 *.tsbuildinfo
+cookies.txt
+cookies.json
