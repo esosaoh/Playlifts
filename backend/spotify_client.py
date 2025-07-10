@@ -22,11 +22,22 @@ class SpotifyClient(object):
         
         if results:
             # assume the first track in the list is the song we want
-            return results[0]['id']
+            track_data = results[0]
+            artwork_url = None
+            if track_data.get('album') and track_data['album'].get('images'):
+                artwork_url = track_data['album']['images'][0]['url']
+            
+            return {
+                'id': track_data['id'],
+                'name': track_data['name'],
+                'artist': track_data['artists'][0]['name'] if track_data['artists'] else artist,
+                'artwork_url': artwork_url
+            }
         else:
             raise Exception(f"No song found for {artist} = {track}")
     
-    def add_song_to_spotify(self, song_id):
+    def add_song_to_spotify(self, song_data):
+        song_id = song_data['id'] if isinstance(song_data, dict) else song_data
         url = "https://api.spotify.com/v1/me/tracks"
         response = requests.put(
             url,
@@ -41,7 +52,8 @@ class SpotifyClient(object):
         
         return response.ok
     
-    def add_song_to_playlist(self, song_id, playlist_id):
+    def add_song_to_playlist(self, song_data, playlist_id):
+        song_id = song_data['id'] if isinstance(song_data, dict) else song_data
         url = f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks"
         response = requests.post(
             url,

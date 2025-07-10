@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
-import { ProgressBar } from "../ui/ProgressBar";
 import { SongPreview } from "./SongPreview";
 import { PlaylistSelector } from "./PlaylistSelector";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/Card";
@@ -15,7 +14,6 @@ export const PlaylistTransfer = () => {
   const [selectedPlaylistImage, setSelectedPlaylistImage] = useState<string | null>(null);
   const [showPlaylistSelector, setShowPlaylistSelector] = useState(false);
   const [isTransferring, setIsTransferring] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [songs, setSongs] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,7 +21,6 @@ export const PlaylistTransfer = () => {
     setIsTransferring(true);
     setError(null);
     setSongs([]);
-    setProgress(0);
 
     try {
       const res = await fetch("http://localhost:8889/process-youtube", {
@@ -39,15 +36,16 @@ export const PlaylistTransfer = () => {
 
       console.log('Transfer response:', { status: res.status, data });
 
-      if (res.ok) {
+      if (res.status === 202 && data.task_id) {
+        // start polling
+        pollTaskStatus(data.task_id);
+      } else if (res.ok) {
         const allSongs = [
           ...data.success.songs.map((s: any) => ({ ...s, status: "success" })),
           ...data.failed.songs.map((s: any) => ({ ...s, status: "failed", reason: s.reason })),
         ];
         setSongs(allSongs);
-        setProgress(100);
         
-        // Show success message even if some songs failed
         if (data.success.count > 0) {
           setError(null);
         } else {
@@ -59,9 +57,76 @@ export const PlaylistTransfer = () => {
     } catch (e: any) {
       console.error('Transfer error:', e);
       setError("Could not process this playlist. Please check your YouTube Music link and try again.");
-    } finally {
       setIsTransferring(false);
     }
+  };
+
+  const pollTaskStatus = async (taskId: string) => {
+    let pollCount = 0;
+    const maxPolls = 300; // 10 minutes at 1-second intervals
+    
+    const pollInterval = setInterval(async () => {
+      pollCount++;
+      
+      try {
+        const response = await fetch(`http://localhost:8889/task-status/${taskId}`, {
+          credentials: "include"
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('Task status:', data.state);
+
+        if (data.state === 'PENDING') { 
+          console.log('Task pending, continuing to poll...');
+        } else if (data.state === 'PROGRESS') {
+          console.log('Task in progress, continuing to poll...');
+        } else if (data.state === 'SUCCESS') {
+          clearInterval(pollInterval);
+          setIsTransferring(false);
+          
+          const result = data.result;
+          const allSongs = [
+            ...result.success.songs.map((s: any) => ({ ...s, status: "success" })),
+            ...result.failed.songs.map((s: any) => ({ ...s, status: "failed", reason: s.reason })),
+          ];
+          setSongs(allSongs);
+          
+          if (result.success.count > 0) {
+            setError(null);
+          } else {
+            setError("No songs were successfully transferred. Please check your YouTube Music link and try again.");
+          }
+        } else if (data.state === 'FAILURE') {
+          clearInterval(pollInterval);
+          setIsTransferring(false);
+          const errorMessage = data.status || data.error || 'Unknown error occurred during transfer';
+          setError(`Transfer failed: ${errorMessage}`);
+        }
+        
+        if (pollCount >= maxPolls) {
+          clearInterval(pollInterval);
+          setIsTransferring(false);
+          setError("Transfer timed out. Please try again with a smaller playlist.");
+        }
+        
+      } catch (error) {
+        console.error('Polling error:', error);
+        
+        if (pollCount > 5) {
+          clearInterval(pollInterval);
+          setIsTransferring(false);
+          setError("Failed to check transfer status. Please try again.");
+        }
+      }
+    }, 1000);
+
+    return () => {
+      clearInterval(pollInterval);
+    };
   };
 
   const handlePlaylistSelect = (playlistId: string | null, playlistName?: string, playlistImage?: string | null) => {
@@ -174,12 +239,12 @@ export const PlaylistTransfer = () => {
                 <Button
                   onClick={handleTransfer}
                   loading={isTransferring}
-                  disabled={!url}
+                  disabled={!url || isTransferring}
                   size="lg"
                   className="w-full text-lg py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg"
                 >
                   <Youtube className="w-5 h-5" />
-                  Transfer to Spotify
+                  {isTransferring ? "Transferring..." : "Transfer to Spotify"}
                   <Music2 className="w-5 h-5" />
                 </Button>
               </div>
@@ -190,9 +255,16 @@ export const PlaylistTransfer = () => {
                   animate={{ opacity: 1, height: "auto" }}
                   className="space-y-4 w-full"
                 >
-                  <ProgressBar value={progress} label="Transferring songs..." />
-                  <div className="text-center text-sm text-gray-600 dark:text-gray-300">
-                    Processing your playlist...
+                  <div className="flex items-center justify-center space-x-3 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                    <div className="text-center">
+                      <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Transferring your playlist to {getDestinationText()}...
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        This may take a few minutes for large playlists
+                      </div>
+                    </div>
                   </div>
                 </motion.div>
               )}

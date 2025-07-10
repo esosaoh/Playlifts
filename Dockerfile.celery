@@ -1,0 +1,13 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY backend/ .
+
+ENV PYTHONPATH=/app
+ENV REDIS_URL=redis://redis:6379/0
+
+CMD ["sh", "-c", "python -c 'import tasks' && celery -A celery_config.celery worker --loglevel=info"]

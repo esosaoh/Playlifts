@@ -14,12 +14,10 @@ export const Header = () => {
       await fetch('http://localhost:8889/logout', {
         method: 'POST',
         credentials: 'include'
-      })
-      // Force page reload to clear any cached state
+      })  
       window.location.reload()
     } catch (error) {
       console.error('Logout failed:', error)
-      // Still reload to force fresh state
       window.location.reload()
     }
   }

@@ -4,10 +4,12 @@ import os
 import urllib.parse
 from datetime import datetime
 from dotenv import load_dotenv
+from tasks import transfer_playlist_task
 from youtube_client import YouTubeClient
 from urllib.parse import urlparse, parse_qs
 from spotify_client import SpotifyClient
 from config import app
+from celery_config import celery
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__)) 
 CREDS_PATH = os.path.join(CURRENT_DIR, 'creds', 'client_secret.json')
@@ -157,65 +159,47 @@ def process_youtube():
 
     try:
         youtube_url = request.json['url']
-        target_playlist_id = request.json.get('playlist_id') # if none, add to liked songs?
-        
+        target_playlist_id = request.json.get('playlist_id')
+
         parsed_url = urlparse(youtube_url)
         if 'youtube.com' not in parsed_url.netloc:
-            return jsonify({"error": "Not a valid YouTube URL"}), 400
-            
+            return jsonify({"error": "Invalid YouTube URL"}), 400
+
         query_params = parse_qs(parsed_url.query)
         playlist_id = query_params.get('list', [None])[0]
-        
+
         if not playlist_id:
-            return jsonify({"error": "Could not find playlist ID in URL"}), 400
+            return jsonify({"error": "No playlist ID found"}), 400
 
-        youtube_client = YouTubeClient(YOUTUBE_API_KEY)
-        spotify_client = SpotifyClient(session['access_token'])
-        
-        songs = youtube_client.get_videos_from_playlist(playlist_id)
-        successful_transfers = []
-        failed_transfers = []
+        task = transfer_playlist_task.delay(session['access_token'], playlist_id, target_playlist_id)
 
-        for song in songs:
-            try:
-                spotify_song_id = spotify_client.search_song(song.artist, song.track)
-                
-                if target_playlist_id:
-                    success = spotify_client.add_song_to_playlist(spotify_song_id, target_playlist_id)
-                else:
-                    success = spotify_client.add_song_to_spotify(spotify_song_id)
-                
-                if success:
-                    successful_transfers.append({
-                        'artist': song.artist,
-                        'track': song.track
-                    })
-                else:
-                    failed_transfers.append({
-                        'artist': song.artist,
-                        'track': song.track,
-                        'reason': 'Failed to add to Spotify'
-                    })
-            except Exception as e:
-                failed_transfers.append({
-                    'artist': song.artist,
-                    'track': song.track,
-                    'reason': str(e)
-                })
-
-        return jsonify({
-            'success': {
-                'count': len(successful_transfers),
-                'songs': successful_transfers
-            },
-            'failed': {
-                'count': len(failed_transfers),
-                'songs': failed_transfers
-            }
-        })
+        return jsonify({"task_id": task.id}), 202
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"error": str(e)}), 500
+    
+
+@app.route('/task-status/<task_id>')
+def task_status(task_id):
+    task = celery.AsyncResult(task_id)
+    
+    if task.state == 'PENDING':
+        response = {'state': task.state, 'status': 'Waiting to start'}
+    elif task.state == 'PROGRESS':
+        # Extract progress from task.info.meta
+        progress = 0
+        if hasattr(task.info, 'get'):
+            progress = task.info.get('progress', 0)
+        elif isinstance(task.info, dict):
+            progress = task.info.get('progress', 0)
+        response = {'state': task.state, 'progress': progress}
+    elif task.state == 'SUCCESS':
+        response = {'state': task.state, 'result': task.result}
+    else:
+        response = {'state': task.state, 'status': str(task.info)}
+    
+    return jsonify(response)
+
     
 def get_user_id():
     if 'access_token' not in session:

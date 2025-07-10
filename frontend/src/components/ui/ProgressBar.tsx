@@ -7,11 +7,17 @@ interface ProgressBarProps {
 
 export const ProgressBar: React.FC<ProgressBarProps> = ({ value, label }) => (
   <div className="w-full">
-    {label && <span className="block mb-1 text-sm">{label}</span>}
-    <div className="w-full bg-gray-200 rounded h-3">
+    <div className="flex justify-between items-center mb-2">
+      {label && <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</span>}
+      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{Math.round(value)}%</span>
+    </div>
+    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
       <div
-        className="bg-green-600 h-3 rounded transition-all"
-        style={{ width: `${value}%` }}
+        className="bg-gradient-to-r from-green-500 to-emerald-600 h-3 rounded-full transition-all duration-500 ease-out shadow-sm"
+        style={{ 
+          width: `${Math.max(value, 0.5)}%`,
+          minWidth: value > 0 ? '4px' : '0px'
+        }}
         aria-valuenow={value}
         aria-valuemin={0}
         aria-valuemax={100}

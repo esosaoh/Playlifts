@@ -9,13 +9,24 @@ import { SunIcon, MoonIcon } from '@heroicons/react/24/outline'
 
 function LoginPage() {
   const [dark, setDark] = useState(true)
+  const [isRetrying, setIsRetrying] = useState(false)
+  
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark)
   }, [dark])
+  
   const handleLogin = async () => {
-    const res = await fetch('http://localhost:8889/login')
-    const data = await res.json()
-    window.location.href = data.auth_url
+    setIsRetrying(true)
+    try {
+      const res = await fetch('http://localhost:8889/login')
+      const data = await res.json()
+      window.location.href = data.auth_url
+    } catch (error) {
+      console.error('Login failed:', error)
+      alert('Failed to start login process. Please check your connection and try again.')
+    } finally {
+      setIsRetrying(false)
+    }
   }
 
   return (
@@ -60,11 +71,12 @@ function LoginPage() {
 
         <Button
           onClick={handleLogin}
+          loading={isRetrying}
           size="lg"
           className="w-full text-lg py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg"
         >
           <Music2 className="w-5 h-5" />
-          Login with Spotify
+          {isRetrying ? 'Connecting...' : 'Login with Spotify'}
         </Button>
       </motion.div>
     </div>
@@ -91,12 +103,17 @@ function App() {
   if (isLoggedIn === null) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">Checking login status...</p>
+        </div>
       </div>
     )
   }
 
-  if (!isLoggedIn) return <LoginPage />
+  if (!isLoggedIn) {
+    return <LoginPage />
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">

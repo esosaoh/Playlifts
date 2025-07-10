@@ -7,8 +7,23 @@ export const SongPreview = ({ song }: { song: any }) => (
     transition={{ duration: 0.3, ease: 'easeOut' }}
     className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-800 mb-2 shadow-md border border-gray-100 dark:border-gray-700"
   >
-    {/* Placeholder for artwork */}
-    <div className="w-14 h-14 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center text-gray-400 text-xl font-bold">
+    {/* Song artwork */}
+    {song.artwork_url ? (
+      <img 
+        src={song.artwork_url} 
+        alt={`${song.track} by ${song.artist}`}
+        className="w-14 h-14 rounded-xl object-cover shadow-sm"
+        onError={(e) => {
+          const target = e.currentTarget as HTMLImageElement;
+          target.style.display = 'none';
+          const placeholder = target.nextElementSibling as HTMLElement;
+          if (placeholder) {
+            placeholder.style.display = 'flex';
+          }
+        }}
+      />
+    ) : null}
+    <div className={`w-14 h-14 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center text-gray-400 text-xl font-bold ${song.artwork_url ? 'hidden' : ''}`}>
       ♫
     </div>
     <div className="flex-1 min-w-0">
