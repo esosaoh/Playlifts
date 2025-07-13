@@ -1,10 +1,10 @@
-# ListenUP
+# Playlifts
 
 A full-stack web application for transferring tracks from YouTube playlists to Spotify.
 
 ## Overview
 
-**ListenUP** is a web application that allows users to transfer songs from their YouTube playlists to their Spotify libraries seamlessly. It integrates both the YouTube and Spotify APIs, enabling users to fetch, search, and add tracks to their Spotify accounts with ease.
+**Playlifts** is a web application that allows users to transfer songs from their YouTube playlists to their Spotify libraries seamlessly. It integrates both the YouTube and Spotify APIs, enabling users to fetch, search, and add tracks to their Spotify accounts with ease.
 
 ## Features
 
@@ -30,8 +30,8 @@ A full-stack web application for transferring tracks from YouTube playlists to S
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/esosaoh/ListenUP.git
-cd ListenUP
+git clone https://github.com/esosaoh/Playlifts.git
+cd Playlifts
 ```
 
 ### 2. Configure Environment Variables

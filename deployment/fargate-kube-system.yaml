@@ -1,0 +1,11 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: playlifts
+  region: us-east-2
+
+fargateProfiles:
+  - name: kube-system
+    selectors:
+      - namespace: kube-system

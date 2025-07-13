@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: celery
+  template:
+    metadata:
+      labels:
+        app: celery
+    spec:
+      containers:
+        - name: celery
+          image: 580534058667.dkr.ecr.us-east-2.amazonaws.com/listenup-celery-worker:latest
+          command:
+            - sh
+            - -c
+            - "python -c 'import tasks' && celery -A celery_config.celery worker --loglevel=info"
+          env:
+            - name: REDIS_URL
+              value: redis://redis:6379/0
+            - name: BACKEND_URL
+              value: http://backend:5000
+          imagePullPolicy: IfNotPresent
+      imagePullSecrets:
+        - name: ecr-secret
