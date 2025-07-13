@@ -6,7 +6,7 @@ load_dotenv(override=True)
 
 def make_celery():
     celery = Celery(
-        'listenup',
+        'playlifts',
         broker=os.getenv('REDIS_URL', 'redis://localhost:6379/0'),
         backend=os.getenv('REDIS_URL', 'redis://localhost:6379/0')
     )

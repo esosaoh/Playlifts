@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.client
-    image: listenup-client
+    image: playlifts-client
     ports:
       - "5173:80"  
     depends_on:
@@ -13,7 +13,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.api
-    image: listenup-api
+    image: playlifts-api
     ports:
       - "8889:8889"
     depends_on:

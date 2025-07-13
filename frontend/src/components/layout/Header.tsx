@@ -26,7 +26,7 @@ export const Header = () => {
     <header className="flex items-center justify-between px-8 py-4 bg-white dark:bg-gray-900 shadow-md rounded-b-2xl">
       <div className="flex items-center gap-2">
         <span className="text-2xl font-extrabold text-green-600 tracking-tight">
-          ListenUP
+          Playlifts
         </span>
       </div>
       <div className="flex items-center gap-2">

@@ -48,7 +48,7 @@ function LoginPage() {
 
         <div className="space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
-            ListenUP
+            Playlifts
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300">
             Transfer your YouTube Music playlists to Spotify seamlessly
