@@ -23,11 +23,11 @@ CORS(app, origins=[
 
 app.config.update(
     SESSION_COOKIE_SAMESITE='None',
-    SESSION_COOKIE_SECURE=IS_PROD,
+    SESSION_COOKIE_SECURE=True,
 )
 
-REDIRECT_URI = os.getenv('REDIRECT_URI') if IS_PROD else 'http://localhost:8889/callback'
-FRONTEND_URL = 'https://playlifts.com' if IS_PROD else 'http://localhost:5173'
+REDIRECT_URI = os.getenv('REDIRECT_URI') # if IS_PROD else 'http://localhost:8889/callback'
+FRONTEND_URL = 'https://playlifts.com' # if IS_PROD else 'http://localhost:5173'
 
 app.secret_key = os.getenv('SECRET_KEY')
 
