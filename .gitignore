@@ -14,3 +14,4 @@ flask_session/
 *.tsbuildinfo
 cookies.txt
 cookies.json
+*.pem
