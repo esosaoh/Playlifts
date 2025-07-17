@@ -14,7 +14,7 @@ from celery_config import celery
 
 load_dotenv(override=True)
 
-IS_PROD = os.getenv("FLASK_ENV") == "production"
+# IS_PROD = os.getenv("FLASK_ENV") == "production"
 
 CORS(app, origins=[
     "https://playlifts.com", 
