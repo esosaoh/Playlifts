@@ -14,10 +14,10 @@ A full-stack web application for transferring tracks from YouTube playlists to S
 
 ## Tech Stack
 
-- **Backend**: Python (Flask), MySQL, Spotify API, YouTube Data API
+- **Backend**: Python (Flask, Celery), Redis, MySQL, Spotify API, YouTube Data API
 - **Frontend**: React.js, TypeScript, Tailwind CSS
 - **Authentication**: OAuth 2.0 with Spotify
-- **Containerization**: Docker, Docker Compose
+- **Containerization**: Docker, Docker Compose, Nginx
 
 ## Prerequisites
 
