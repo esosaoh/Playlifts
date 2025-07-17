@@ -1,3 +1,4 @@
+version: "3.8"
 services:
   backend:
     build:
@@ -8,8 +9,10 @@ services:
       - "8889:8889"
     depends_on:
       - redis
+    env_file:
+      - backend/.env
     environment:
-      - REDIS_URL=redis://redis:6379/0
+      - REDIS_URL=${REDIS_URL}
 
   celery-worker:
     build:
@@ -17,10 +20,12 @@ services:
       dockerfile: Dockerfile.celery
     depends_on:
       - redis
+    env_file:
+      - backend/.env
     environment:
-      - REDIS_URL=redis://redis:6379/0
+      - REDIS_URL=${REDIS_URL}
 
   redis:
     image: redis:7-alpine
     ports:
-      - "6380:6379"
+      - "6379:6379"
