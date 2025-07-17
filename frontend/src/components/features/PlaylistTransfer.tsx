@@ -70,7 +70,7 @@ export const PlaylistTransfer = () => {
       
       try {
         const response = await fetch(`https://api.playlifts.com/task-status/${taskId}`, {
-          credentials: "include"
+          credentials: 'include'
         });
         
         if (!response.ok) {
