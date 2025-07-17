@@ -19,5 +19,5 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/ec2-user/backend
+            cd /home/ec2-user/scripts
             ./deploy.sh
