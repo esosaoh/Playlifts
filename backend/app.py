@@ -92,7 +92,7 @@ def callback():
         response = redirect(FRONTEND_URL)
         response.set_cookie('is_logged_in', 'true',
                             samesite='None',
-                            secure=IS_PROD,
+                            secure=True,
                             httponly=False)
         return response
     except Exception as e:
@@ -207,4 +207,4 @@ def logout():
     return response
 
 if __name__ == '__main__':
-    app.run(port=8889, debug=not IS_PROD)
+    app.run(port=8889, debug=False)
