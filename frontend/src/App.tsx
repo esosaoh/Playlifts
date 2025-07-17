@@ -18,7 +18,7 @@ function LoginPage() {
   const handleLogin = async () => {
     setIsRetrying(true)
     try {
-      const res = await fetch('http://localhost:8889/login')
+      const res = await fetch('shttp://api.playlifts.com/login')
       const data = await res.json()
       window.location.href = data.auth_url
     } catch (error) {

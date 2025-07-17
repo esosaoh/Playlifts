@@ -23,7 +23,7 @@ export const PlaylistTransfer = () => {
     setSongs([]);
 
     try {
-      const res = await fetch("http://localhost:8889/process-youtube", {
+      const res = await fetch("https://api.playlifts.com/process-youtube", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -69,7 +69,7 @@ export const PlaylistTransfer = () => {
       pollCount++;
       
       try {
-        const response = await fetch(`http://localhost:8889/task-status/${taskId}`, {
+        const response = await fetch(`https://api.playlifts.com/task-status/${taskId}`, {
           credentials: "include"
         });
         

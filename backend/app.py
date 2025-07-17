@@ -1,5 +1,6 @@
 import requests
 from flask import redirect, url_for, request, session, jsonify, render_template
+from flask_cors import CORS
 import os
 import urllib.parse
 from datetime import datetime
@@ -11,17 +12,28 @@ from spotify_client import SpotifyClient
 from config import app
 from celery_config import celery
 
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-CREDS_PATH = os.path.join(CURRENT_DIR, 'creds', 'client_secret.json')
+load_dotenv(override=True)
+
+IS_PROD = os.getenv("FLASK_ENV") == "production"
+
+CORS(app, origins=[
+    "https://playlifts.com", 
+    "https://www.playlifts.com",
+    "http://playlifts.com"
+], supports_credentials=True)
+
+app.config.update(
+    SESSION_COOKIE_SAMESITE='None',
+    SESSION_COOKIE_SECURE=IS_PROD,
+)
+
+REDIRECT_URI = os.getenv('REDIRECT_URI') if IS_PROD else 'http://localhost:8889/callback'
+FRONTEND_URL = 'https://playlifts.com' if IS_PROD else 'http://localhost:5173'
 
 app.secret_key = os.getenv('SECRET_KEY')
 
-load_dotenv(override=True)
-
 CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
 CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
-REDIRECT_URI = 'http://localhost:8889/callback'
-
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
 API_BASE_URL = 'https://api.spotify.com/v1/'
@@ -30,7 +42,7 @@ YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY')
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return jsonify({"message": "Welcome to the Playlifts API! Documentation is available at https://github.com/esosaoh/playlifts/blob/main/README.md"})
 
 @app.route('/login')
 def login():
@@ -50,11 +62,9 @@ def login():
 @app.route('/callback')
 def callback():
     if 'error' in request.args:
-         return jsonify({"status": "error", "message": request.args['error']}), 400
-    
+        return jsonify({"status": "error", "message": request.args['error']}), 400
     if 'code' not in request.args:
         return jsonify({"status": "error", "message": "Authorization code not found"}), 400
-    
     try:
         auth_code = request.args['code']
 
@@ -72,24 +82,20 @@ def callback():
             return jsonify({"status": "error", "message": f"Token request failed with status {response.status_code}"}), 400
 
         token_info = response.json()
-        
         if 'access_token' not in token_info:
-            error_msg = f"No access token in response. Response: {token_info}"
-            return jsonify({"status": "error", "message": error_msg}), 400
+            return jsonify({"status": "error", "message": f"No access token in response. Response: {token_info}"}), 400
 
         session['access_token'] = token_info['access_token']
         session['refresh_token'] = token_info['refresh_token']
         session['expires_at'] = datetime.now().timestamp() + token_info['expires_in']
         session['is_logged_in'] = True
 
-        #return jsonify({"status": "success", "message": "Authorization successful"}), 200
-        response = redirect('http://localhost:5173')
-        response.set_cookie('is_logged_in', 'true', 
-                          samesite='Lax',
-                          secure=False,
-                          httponly=False)
+        response = redirect(FRONTEND_URL)
+        response.set_cookie('is_logged_in', 'true',
+                            samesite='None',
+                            secure=IS_PROD,
+                            httponly=False)
         return response
-    
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
@@ -102,36 +108,29 @@ def get_playlists():
         headers = {
             'Authorization': f"Bearer {session['access_token']}"
         }
-        
         user_response = requests.get('https://api.spotify.com/v1/me', headers=headers)
         if user_response.status_code != 200:
             return jsonify({"error": "Failed to fetch user profile"}), 400
-            
         user_data = user_response.json()
         current_user_id = user_data['id']
 
         all_playlists = []
         offset = 0
         limit = 50
-        
         while True:
-            response = requests.get(f'https://api.spotify.com/v1/me/playlists?limit={limit}&offset={offset}', headers=headers)
-            
+            response = requests.get(
+                f'https://api.spotify.com/v1/me/playlists?limit={limit}&offset={offset}', headers=headers)
             if response.status_code != 200:
                 return jsonify({"error": f"Failed to fetch playlists: {response.status_code}"}), 400
-                
             playlists_data = response.json()
             playlists = playlists_data['items']
-            
             if not playlists:
                 break
-                
             for playlist in playlists:
                 if playlist['owner']['id'] == current_user_id:
                     cover_image = None
                     if playlist.get('images') and len(playlist['images']) > 0:
                         cover_image = playlist['images'][0]['url']
-                    
                     playlist_info = {
                         'id': playlist['id'],
                         'name': playlist['name'],
@@ -141,14 +140,10 @@ def get_playlists():
                         'cover_image': cover_image
                     }
                     all_playlists.append(playlist_info)
-            
             offset += limit
-            
             if len(playlists) < limit:
                 break
-        
         return jsonify({"playlists": all_playlists})
-        
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -171,22 +166,22 @@ def process_youtube():
         if not playlist_id:
             return jsonify({"error": "No playlist ID found"}), 400
 
-        task = transfer_playlist_task.delay(session['access_token'], playlist_id, target_playlist_id)
+        task = transfer_playlist_task.delay(
+            session['access_token'], playlist_id, target_playlist_id)
 
         return jsonify({"task_id": task.id}), 202
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
 
 @app.route('/task-status/<task_id>')
 def task_status(task_id):
     task = celery.AsyncResult(task_id)
-    
+
     if task.state == 'PENDING':
         response = {'state': task.state, 'status': 'Waiting to start'}
     elif task.state == 'PROGRESS':
-        # Extract progress from task.info.meta
         progress = 0
         if hasattr(task.info, 'get'):
             progress = task.info.get('progress', 0)
@@ -197,22 +192,8 @@ def task_status(task_id):
         response = {'state': task.state, 'result': task.result}
     else:
         response = {'state': task.state, 'status': str(task.info)}
-    
     return jsonify(response)
 
-    
-def get_user_id():
-    if 'access_token' not in session:
-        return None 
-    headers = {
-        'Authorization': f"Bearer {session['access_token']}"
-    }
-    user_response = requests.get('https://api.spotify.com/v1/me', headers=headers)
-    if user_response.status_code != 200:
-        return None 
-    user_data = user_response.json()
-
-    return user_data.get('id')
 
 @app.route('/check_login', methods=['GET'])
 def check_login():
@@ -225,7 +206,6 @@ def logout():
     response = jsonify({"status": "success", "message": "Logged out successfully"})
     response.delete_cookie('is_logged_in')
     return response
-    
+
 if __name__ == '__main__':
-    app.run(port=8889, debug=False)
-    
+    app.run(port=8889, debug=not IS_PROD)
