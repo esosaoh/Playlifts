@@ -1,23 +1,18 @@
 #!/bin/bash
-
 set -e
 
-APP_DIR="/home/ec2-user"
+source ./backend/.env
 
-echo ">>> Deploying latest code..."
-cd $APP_DIR
+echo ">>> Copying files to EC2..."
+scp -i "$KEY_PATH" -r backend "$EC2_USER@$EC2_HOST:$REMOTE_DIR"
 
-echo ">>> Pulling latest code from GitHub..."
-git reset --hard
-git pull origin main
+echo ">>> Restarting backend Docker container..."
 
-echo ">>> Activating virtual environment..."
-source venv/bin/activate
-
-echo ">>> Installing dependencies..."
-pip install -r backend/requirements.txt
-
-echo ">>> Restarting backend service..."
-sudo systemctl restart api
+ssh -i "$KEY_PATH" "$EC2_USER@$EC2_HOST" << EOF
+docker stop ec2-user-backend-1 || true
+docker rm ec2-user-backend-1 || true
+docker build -t playlifts-api -f $REMOTE_DIR/Dockerfile.api $REMOTE_DIR
+docker run -d --name ec2-user-backend-1 -p 8889:8889 playlifts-api
+EOF
 
 echo ">>> Deployment complete!"
