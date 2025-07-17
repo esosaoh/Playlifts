@@ -18,8 +18,7 @@ IS_PROD = os.getenv("FLASK_ENV") == "production"
 
 CORS(app, origins=[
     "https://playlifts.com", 
-    "https://www.playlifts.com",
-    "http://playlifts.com"
+    "https://www.playlifts.com"
 ], supports_credentials=True)
 
 app.config.update(
