@@ -95,8 +95,17 @@ def callback():
                             secure=True,
                             httponly=False)
         return response
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception:
+        app.logger.exception("Error in process_youtube")
+        raise
+
+
+from flask import jsonify
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    app.logger.error(f"Internal error: {e}", exc_info=True)
+    return jsonify({"error": "Internal Server Error. Please try again later."}), 500
 
 @app.route('/get-playlists', methods=['GET'])
 def get_playlists():
@@ -143,8 +152,9 @@ def get_playlists():
             if len(playlists) < limit:
                 break
         return jsonify({"playlists": all_playlists})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        app.logger.exception("Error in process_youtube")
+        raise
 
 @app.route('/process-youtube', methods=['POST'])
 def process_youtube():
@@ -170,9 +180,9 @@ def process_youtube():
 
         return jsonify({"task_id": task.id}), 202
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
+    except Exception:
+        app.logger.exception("Error in process_youtube")
+        raise
 
 @app.route('/task-status/<task_id>')
 def task_status(task_id):
@@ -192,7 +202,6 @@ def task_status(task_id):
     else:
         response = {'state': task.state, 'status': str(task.info)}
     return jsonify(response)
-
 
 @app.route('/check_login', methods=['GET'])
 def check_login():
