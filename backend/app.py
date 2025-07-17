@@ -43,6 +43,10 @@ YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY')
 def index():
     return jsonify({"message": "Welcome to the Playlifts API! Documentation is available at https://github.com/esosaoh/playlifts/blob/main/README.md"})
 
+@app.route('/healthz', methods=['GET'])
+def health_check():
+    return jsonify({"status": "ok"}), 200
+    
 @app.route('/login')
 def login():
     scope = 'user-read-private user-read-email user-library-modify playlist-read-private playlist-modify-public playlist-modify-private'
