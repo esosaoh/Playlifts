@@ -1,5 +1,5 @@
 import requests
-from flask import redirect, url_for, request, session, jsonify, render_template
+from flask import redirect, url_for, request, session, jsonify
 from flask_cors import CORS
 import os
 import urllib.parse
@@ -98,9 +98,6 @@ def callback():
     except Exception:
         app.logger.exception("Error in process_youtube")
         raise
-
-
-from flask import jsonify
 
 @app.errorhandler(Exception)
 def handle_exception(e):
