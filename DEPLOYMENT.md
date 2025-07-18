@@ -1,7 +1,7 @@
 # Deployment Guide
 
 This document explains how to deploy Playlifts.  
-For local setup details, see [backend.md](./backend/BACKEND.md).
+For local setup details, see [backend/README.md](./backend/README.md).
 
 ---
 
