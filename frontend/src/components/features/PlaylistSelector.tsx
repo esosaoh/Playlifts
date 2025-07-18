@@ -33,7 +33,7 @@ export const PlaylistSelector = ({ onPlaylistSelect, selectedPlaylistId }: Playl
     
     try {
       const timestamp = Date.now()
-      const response = await fetch(`https://api.playlifts.com/get-playlists?t=${timestamp}`, {
+      const response = await fetch(`https://api.playlifts.com/spotify/playlists?t=${timestamp}`, {
         credentials: "include"
       });
       

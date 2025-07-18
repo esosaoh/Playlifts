@@ -23,7 +23,7 @@ export const PlaylistTransfer = () => {
     setSongs([]);
 
     try {
-      const res = await fetch("https://api.playlifts.com/process-youtube", {
+      const res = await fetch("https://api.playlifts.com/youtube/transfer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -69,7 +69,7 @@ export const PlaylistTransfer = () => {
       pollCount++;
       
       try {
-        const response = await fetch(`https://api.playlifts.com/task-status/${taskId}`, {
+        const response = await fetch(`https://api.playlifts.com/tasks/status/${taskId}`, {
           credentials: 'include'
         });
         
@@ -150,25 +150,6 @@ export const PlaylistTransfer = () => {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="max-w-4xl mx-auto"
         >
-          {/* Hero Section */}
-          <div className="text-center mb-12">
-            <motion.div
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl mb-6 shadow-lg"
-            >
-              <Music className="w-8 h-8 text-white" />
-            </motion.div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-              Transfer Your Music
-            </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-lg mx-auto">
-              Seamlessly move your YouTube Music playlists to Spotify with our
-              intelligent transfer system
-            </p>
-          </div>
-
           {/* Main Transfer Card */}
           <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-2xl">
             <CardHeader className="text-center pb-4 flex flex-col items-center">
