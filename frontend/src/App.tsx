@@ -3,10 +3,13 @@ import { Button } from './components/ui/Button'
 import { Header } from './components/layout/Header'
 import { PlaylistTransfer } from './components/features/PlaylistTransfer'
 import { SpotifyToYouTubeTransfer } from './components/features/SpotifyToYouTubeTransfer'
+import { PrivacyPolicy } from './components/pages/PrivacyPolicy'
+import { TermsOfService } from './components/pages/TermsOfService'
 import { motion } from 'framer-motion'
 import { Music, Music2, Youtube } from 'lucide-react'
 import { useEffect, useState, useLayoutEffect } from 'react'
 import { SunIcon, MoonIcon } from '@heroicons/react/24/outline'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
 function LoginPage() {
   const [dark, setDark] = useState(true)
@@ -104,6 +107,16 @@ function LoginPage() {
             <Youtube className="w-5 h-5" />
             {isRetrying ? 'Connecting...' : 'Transfer Spotify → YouTube'}
           </Button>
+        </div>
+
+        {/* Footer Links */}
+        <div className="flex justify-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
+          <a href="/privacy-policy" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
+            Privacy Policy
+          </a>
+          <a href="/terms" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
+            Terms of Service
+          </a>
         </div>
       </motion.div>
     </div>
@@ -217,7 +230,7 @@ function TransferApp({ loginStatus }: { loginStatus: any }) {
   )
 }
 
-function App() {
+function AppContent() {
   useLayoutEffect(() => {
     document.documentElement.classList.add('dark');
   }, []);
@@ -252,6 +265,18 @@ function App() {
 
   // If logged into at least one service, show the transfer app (it will show login buttons for missing services as needed)
   return <TransferApp loginStatus={loginStatus} />
+}
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="*" element={<AppContent />} />
+      </Routes>
+    </Router>
+  )
 }
 
 export default App

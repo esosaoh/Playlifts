@@ -1,5 +1,6 @@
 import { SunIcon, MoonIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 export const Header = () => {
   const [dark, setDark] = useState(false)
@@ -25,11 +26,20 @@ export const Header = () => {
   return (
     <header className="flex items-center justify-between px-8 py-4 bg-white dark:bg-gray-900 shadow-md rounded-b-2xl">
       <div className="flex items-center gap-2">
-        <span className="text-2xl font-extrabold text-green-600 tracking-tight">
+        <Link to="/" className="text-2xl font-extrabold text-green-600 tracking-tight hover:text-green-700 transition-colors">
           Playlifts
-        </span>
+        </Link>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4">
+        {/* Footer Links */}
+        <div className="flex space-x-4 text-sm text-gray-600 dark:text-gray-400">
+          <Link to="/privacy-policy" className="hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+            Privacy
+          </Link>
+          <Link to="/terms" className="hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+            Terms
+          </Link>
+        </div>
         <button
           aria-label="Toggle theme"
           onClick={toggleTheme}
