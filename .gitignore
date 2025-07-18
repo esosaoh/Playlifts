@@ -6,8 +6,7 @@ node_modules/
 .vscode/
 .env
 *.log
-backend/creds/client_secret.json
-backend/creds/client_secrets.json
+backend/creds
 create_db.py
 flask_session/
 .flask_session/
