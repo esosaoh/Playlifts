@@ -2,8 +2,9 @@ import { useIsLoggedIn } from './hooks/useIsLoggedIn'
 import { Button } from './components/ui/Button'
 import { Header } from './components/layout/Header'
 import { PlaylistTransfer } from './components/features/PlaylistTransfer'
+import { SpotifyToYouTubeTransfer } from './components/features/SpotifyToYouTubeTransfer'
 import { motion } from 'framer-motion'
-import { Music, Music2 } from 'lucide-react'
+import { Music, Music2, Youtube } from 'lucide-react'
 import { useEffect, useState, useLayoutEffect } from 'react'
 import { SunIcon, MoonIcon } from '@heroicons/react/24/outline'
 
@@ -15,15 +16,29 @@ function LoginPage() {
     document.documentElement.classList.toggle('dark', dark)
   }, [dark])
   
-  const handleLogin = async () => {
+  const handleSpotifyLogin = async () => {
     setIsRetrying(true)
     try {
-      const res = await fetch('https://api.playlifts.com/login', { credentials: 'include' });
+      const res = await fetch('https://api.playlifts.com/spotify/login', { credentials: 'include' });
       const data = await res.json()
       window.location.href = data.auth_url
     } catch (error) {
       console.error('Login failed:', error)
       alert('Failed to start login process. Please check your connection and try again.')
+    } finally {
+      setIsRetrying(false)
+    }
+  }
+
+  const handleYouTubeLogin = async () => {
+    setIsRetrying(true)
+    try {
+      const res = await fetch('https://api.playlifts.com/youtube/login', { credentials: 'include' });
+      const data = await res.json()
+      window.location.href = data.auth_url
+    } catch (error) {
+      console.error('YouTube login failed:', error)
+      alert('Failed to start YouTube login process. Please check your connection and try again.')
     } finally {
       setIsRetrying(false)
     }
@@ -51,7 +66,7 @@ function LoginPage() {
             Playlifts
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300">
-            Transfer your YouTube Music playlists to Spotify seamlessly
+            Transfer your music playlists between YouTube Music and Spotify seamlessly
           </p>
         </div>
 
@@ -69,16 +84,78 @@ function LoginPage() {
           </button>
         </div>
 
-        <Button
-          onClick={handleLogin}
-          loading={isRetrying}
-          size="lg"
-          className="w-full text-lg py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg"
-        >
-          <Music2 className="w-5 h-5" />
-          {isRetrying ? 'Connecting...' : 'Login with Spotify'}
-        </Button>
+        <div className="space-y-4">
+          <Button
+            onClick={handleSpotifyLogin}
+            loading={isRetrying}
+            size="lg"
+            className="w-full text-lg py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg"
+          >
+            <Music2 className="w-5 h-5" />
+            {isRetrying ? 'Connecting...' : 'Transfer YouTube → Spotify'}
+          </Button>
+
+          <Button
+            onClick={handleYouTubeLogin}
+            loading={isRetrying}
+            size="lg"
+            className="w-full text-lg py-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg"
+          >
+            <Youtube className="w-5 h-5" />
+            {isRetrying ? 'Connecting...' : 'Transfer Spotify → YouTube'}
+          </Button>
+        </div>
       </motion.div>
+    </div>
+  )
+}
+
+type TransferMode = 'youtube-to-spotify' | 'spotify-to-youtube'
+
+function TransferApp() {
+  const [transferMode, setTransferMode] = useState<TransferMode>('youtube-to-spotify')
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <Header />
+      <main>
+        {/* Transfer Mode Tabs */}
+        <div className="container mx-auto px-4 pt-8">
+          <div className="max-w-4xl mx-auto mb-8">
+            <div className="flex bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-2 shadow-lg">
+              <button
+                onClick={() => setTransferMode('youtube-to-spotify')}
+                className={`flex-1 flex items-center justify-center gap-3 py-4 px-6 rounded-xl font-semibold transition-all ${
+                  transferMode === 'youtube-to-spotify'
+                    ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                <Youtube className="w-5 h-5" />
+                YouTube → Spotify
+              </button>
+              <button
+                onClick={() => setTransferMode('spotify-to-youtube')}
+                className={`flex-1 flex items-center justify-center gap-3 py-4 px-6 rounded-xl font-semibold transition-all ${
+                  transferMode === 'spotify-to-youtube'
+                    ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                <Music2 className="w-5 h-5" />
+                Spotify → YouTube
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Transfer Components */}
+        {transferMode === 'youtube-to-spotify' ? (
+          <PlaylistTransfer />
+        ) : (
+          <SpotifyToYouTubeTransfer />
+        )}
+      </main>
     </div>
   )
 }
@@ -115,14 +192,7 @@ function App() {
     return <LoginPage />
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <Header />
-      <main>
-        <PlaylistTransfer />
-      </main>
-    </div>
-  )
+  return <TransferApp />
 }
 
 export default App
