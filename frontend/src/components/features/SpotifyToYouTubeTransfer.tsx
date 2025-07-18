@@ -2,33 +2,60 @@ import { useState } from "react";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { SongPreview } from "./SongPreview";
-import { PlaylistSelector } from "./PlaylistSelector";
+import { YouTubePlaylistSelector } from "./YouTubePlaylistSelector";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/Card";
 import { motion } from "framer-motion";
-import { Youtube, Music2, Heart } from "lucide-react";
+import { Youtube, Music2 } from "lucide-react";
 
-export const PlaylistTransfer = () => {
-  const [url, setUrl] = useState("");
-  const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
-  const [selectedPlaylistName, setSelectedPlaylistName] = useState<string | null>(null);
-  const [selectedPlaylistImage, setSelectedPlaylistImage] = useState<string | null>(null);
-  const [showPlaylistSelector, setShowPlaylistSelector] = useState(false);
+export const SpotifyToYouTubeTransfer = () => {
+  const [spotifyUrl, setSpotifyUrl] = useState("");
+  const [selectedYouTubePlaylistId, setSelectedYouTubePlaylistId] = useState<string | null>(null);
+  const [selectedYouTubePlaylistName, setSelectedYouTubePlaylistName] = useState<string | null>(null);
+  const [showYouTubePlaylistSelector, setShowYouTubePlaylistSelector] = useState(false);
   const [isTransferring, setIsTransferring] = useState(false);
   const [songs, setSongs] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  const extractSpotifyPlaylistId = (url: string) => {
+    try {
+      const urlObj = new URL(url);
+      if (urlObj.hostname !== 'open.spotify.com') {
+        return null;
+      }
+      
+      const pathParts = urlObj.pathname.split('/');
+      if (pathParts[1] === 'playlist' && pathParts[2]) {
+        return pathParts[2];
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
   const handleTransfer = async () => {
+    if (!spotifyUrl || !selectedYouTubePlaylistId) {
+      setError("Please provide a Spotify playlist URL and select a YouTube destination");
+      return;
+    }
+
+    const spotifyPlaylistId = extractSpotifyPlaylistId(spotifyUrl);
+    if (!spotifyPlaylistId) {
+      setError("Invalid Spotify playlist URL. Please use a URL like: https://open.spotify.com/playlist/...");
+      return;
+    }
+
     setIsTransferring(true);
     setError(null);
     setSongs([]);
 
     try {
-      const res = await fetch("https://api.playlifts.com/youtube/transfer", {
+      const res = await fetch("https://api.playlifts.com/spotify/transfer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          url,
-          playlist_id: selectedPlaylistId 
+          spotify_playlist_id: spotifyPlaylistId,
+          youtube_playlist_id: selectedYouTubePlaylistId
         }),
         credentials: "include",
       });
@@ -49,14 +76,14 @@ export const PlaylistTransfer = () => {
         if (data.success.count > 0) {
           setError(null);
         } else {
-          setError("No songs were successfully transferred. Please check your YouTube Music link and try again.");
+          setError("No songs were successfully transferred. Please check your Spotify playlist URL and try again.");
         }
       } else {
         setError(`Transfer failed: ${data.error || 'Unknown error'}`);
       }
     } catch (e: any) {
       console.error('Transfer error:', e);
-      setError("Could not process this playlist. Please check your YouTube Music link and try again.");
+      setError("Could not process this transfer. Please check your Spotify playlist URL and try again.");
       setIsTransferring(false);
     }
   };
@@ -90,15 +117,15 @@ export const PlaylistTransfer = () => {
           
           const result = data.result;
           const allSongs = [
-            ...result.success.songs.map((s: any) => ({ ...s, status: "success" })),
-            ...result.failed.songs.map((s: any) => ({ ...s, status: "failed", reason: s.reason })),
+            ...result.success.tracks.map((s: any) => ({ ...s, status: "success" })),
+            ...result.failed.tracks.map((s: any) => ({ ...s, status: "failed", reason: s.reason })),
           ];
           setSongs(allSongs);
           
           if (result.success.count > 0) {
             setError(null);
           } else {
-            setError("No songs were successfully transferred. Please check your YouTube Music link and try again.");
+            setError("No songs were successfully transferred. Please check your Spotify playlist URL and try again.");
           }
         } else if (data.state === 'FAILURE') {
           clearInterval(pollInterval);
@@ -129,16 +156,10 @@ export const PlaylistTransfer = () => {
     };
   };
 
-  const handlePlaylistSelect = (playlistId: string | null, playlistName?: string, playlistImage?: string | null) => {
-    setSelectedPlaylistId(playlistId);
-    setSelectedPlaylistName(playlistName || null);
-    setSelectedPlaylistImage(playlistImage || null);
-    setShowPlaylistSelector(false);
-  };
-
-  const getDestinationText = () => {
-    if (selectedPlaylistId === null) return "Liked Songs";
-    return selectedPlaylistName || "Selected Playlist";
+  const handleYouTubePlaylistSelect = (playlistId: string | null, playlistName?: string) => {
+    setSelectedYouTubePlaylistId(playlistId);
+    setSelectedYouTubePlaylistName(playlistName || null);
+    setShowYouTubePlaylistSelector(false);
   };
 
   return (
@@ -154,65 +175,59 @@ export const PlaylistTransfer = () => {
           <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-2xl">
             <CardHeader className="text-center pb-4 flex flex-col items-center">
               <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white w-full text-center">
-                YouTube Music to Spotify Transfer
+                Spotify to YouTube Music Transfer
               </CardTitle>
               <CardDescription className="text-gray-600 dark:text-gray-300 w-full text-center">
-                Paste your YouTube Music playlist URL below to get started
+                Paste your Spotify playlist URL below to get started
               </CardDescription>
+              <div className="mt-2 text-xs text-yellow-600 dark:text-yellow-300 w-full text-center">
+                Only the first 15 songs will be added due to YouTube API quota limits.
+              </div>
             </CardHeader>
 
             <CardContent className="space-y-6 flex flex-col items-center w-full">
               <div className="space-y-4 w-full">
+                {/* Spotify Playlist URL Input */}
                 <Input
-                  label="YouTube Music Playlist URL"
-                  value={url}
-                  onChange={e => setUrl(e.target.value)}
-                  placeholder="https://music.youtube.com/playlist?list=..."
+                  label="Spotify Playlist URL"
+                  value={spotifyUrl}
+                  onChange={e => setSpotifyUrl(e.target.value)}
+                  placeholder="https://open.spotify.com/playlist/..."
                   disabled={isTransferring}
                   className="text-lg h-14 px-6 w-full border-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 transition rounded-lg"
                 />
 
-                {/* Destination Selection */}
+                {/* YouTube Playlist Selection */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Destination
+                    Destination YouTube Playlist
                   </label>
                   <Button
-                    onClick={() => setShowPlaylistSelector(!showPlaylistSelector)}
+                    onClick={() => setShowYouTubePlaylistSelector(!showYouTubePlaylistSelector)}
                     variant="outline"
                     className="w-full justify-start p-4 h-auto border-2 border-gray-300 dark:border-gray-700"
                   >
-                    {selectedPlaylistId === null ? (
-                      <Heart className="w-5 h-5 mr-3 text-red-500" />
-                    ) : selectedPlaylistImage ? (
-                      <img 
-                        src={selectedPlaylistImage} 
-                        alt={selectedPlaylistName || "Selected playlist"}
-                        className="w-5 h-5 rounded object-cover mr-3"
-                      />
-                    ) : (
-                      <Music2 className="w-5 h-5 mr-3" />
-                    )}
+                    <Youtube className="w-5 h-5 mr-3" />
                     <div className="text-left">
-                      <div className="font-semibold">{getDestinationText()}</div>
+                      <div className="font-semibold">{selectedYouTubePlaylistName || "Select YouTube playlist"}</div>
                       <div className="text-sm opacity-70">
-                        Click to change destination
+                        Click to select destination playlist
                       </div>
                     </div>
                   </Button>
                 </div>
 
-                {/* Playlist Selector */}
-                {showPlaylistSelector && (
+                {/* YouTube Playlist Selector */}
+                {showYouTubePlaylistSelector && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                     className="w-full"
                   >
-                    <PlaylistSelector
-                      onPlaylistSelect={handlePlaylistSelect}
-                      selectedPlaylistId={selectedPlaylistId}
+                    <YouTubePlaylistSelector
+                      onPlaylistSelect={handleYouTubePlaylistSelect}
+                      selectedPlaylistId={selectedYouTubePlaylistId}
                     />
                   </motion.div>
                 )}
@@ -220,13 +235,13 @@ export const PlaylistTransfer = () => {
                 <Button
                   onClick={handleTransfer}
                   loading={isTransferring}
-                  disabled={!url || isTransferring}
+                  disabled={!spotifyUrl || !selectedYouTubePlaylistId || isTransferring}
                   size="lg"
                   className="w-full text-lg py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg"
                 >
-                  <Youtube className="w-5 h-5" />
-                  {isTransferring ? "Transferring..." : "Transfer to Spotify"}
                   <Music2 className="w-5 h-5" />
+                  {isTransferring ? "Transferring..." : "Transfer to YouTube"}
+                  <Youtube className="w-5 h-5" />
                 </Button>
               </div>
 
@@ -240,7 +255,7 @@ export const PlaylistTransfer = () => {
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
                     <div className="text-center">
                       <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Transferring your playlist to {getDestinationText()}...
+                        Transferring your playlist to {selectedYouTubePlaylistName}...
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         This may take a few minutes for large playlists
@@ -266,7 +281,7 @@ export const PlaylistTransfer = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300 text-center w-full"
                 >
-                  Successfully transferred {songs.filter(s => s.status === "success").length} songs to {getDestinationText()}!
+                  Successfully transferred {songs.filter(s => s.status === "success").length} songs to {selectedYouTubePlaylistName}!
                 </motion.div>
               )}
 
@@ -292,4 +307,4 @@ export const PlaylistTransfer = () => {
       </div>
     </div>
   );
-};
+}; 

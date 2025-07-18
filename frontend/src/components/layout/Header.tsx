@@ -11,7 +11,7 @@ export const Header = () => {
 
   const handleLogout = async () => {
     try {
-      await fetch('https://api.playlifts.com/logout', {
+      await fetch('https://api.playlifts.com/auth/logout', {
         method: 'POST',
         credentials: 'include'
       })  
