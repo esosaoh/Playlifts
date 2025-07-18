@@ -25,7 +25,8 @@ load_dotenv(override=True)
 
 CORS(app, origins=[
     "https://playlifts.com",
-    "https://www.playlifts.com"
+    "https://www.playlifts.com",
+    'https://api.playlifts.com'
 ], supports_credentials=True)
 
 app.config.update(
@@ -34,7 +35,7 @@ app.config.update(
 )
 
 SPOTIFY_REDIRECT_URI = os.getenv('SPOTIFY_REDIRECT_URI')
-FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://playlifts.com')
+FRONTEND_URL = 'https://playlifts.com'
 
 app.secret_key = os.getenv('SECRET_KEY')
 
