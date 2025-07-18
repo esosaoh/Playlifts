@@ -16,9 +16,10 @@ interface Playlist {
 interface PlaylistSelectorProps {
   onPlaylistSelect: (playlistId: string | null, playlistName?: string, playlistImage?: string | null) => void;
   selectedPlaylistId: string | null;
+  onSpotifyLogin?: () => void;
 }
 
-export const PlaylistSelector = ({ onPlaylistSelect, selectedPlaylistId }: PlaylistSelectorProps) => {
+export const PlaylistSelector = ({ onPlaylistSelect, selectedPlaylistId, onSpotifyLogin }: PlaylistSelectorProps) => {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,8 +41,8 @@ export const PlaylistSelector = ({ onPlaylistSelect, selectedPlaylistId }: Playl
       if (response.ok) {
         const data = await response.json();
         setPlaylists(data.playlists);
-      } else if (response.status === 401) {
-        setError("Please log in to access your playlists");
+      } else if (response.status === 401 || response.status === 400) {
+        setError("Your Spotify session has expired. Please log in again.");
       } else {
         setError("Failed to load playlists");
       }
@@ -79,6 +80,15 @@ export const PlaylistSelector = ({ onPlaylistSelect, selectedPlaylistId }: Playl
         <CardContent className="p-6">
           <div className="text-center text-red-600 dark:text-red-400">
             {error}
+            {error === "Your Spotify session has expired. Please log in again." && (
+              <Button
+                onClick={onSpotifyLogin || (() => window.location.reload())}
+                variant="outline"
+                className="mt-4"
+              >
+                Login to Spotify
+              </Button>
+            )}
             <Button onClick={fetchPlaylists} variant="outline" className="ml-4">
               Retry
             </Button>
