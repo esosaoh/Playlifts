@@ -7,7 +7,7 @@ export function useIsLoggedIn() {
     const checkLogin = async () => {
       try {
         const timestamp = Date.now()
-        const response = await fetch(`https://api.playlifts.com/check_login?t=${timestamp}`, { 
+        const response = await fetch(`https://api.playlifts.com/auth/check?t=${timestamp}`, { 
           credentials: 'include',
           signal: AbortSignal.timeout(5000)
         })
