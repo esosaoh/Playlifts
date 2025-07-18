@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react'
 
+interface LoginStatus {
+  spotify_logged_in: boolean
+  youtube_logged_in: boolean
+  both_logged_in: boolean
+}
+
 export function useIsLoggedIn() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
+  const [loginStatus, setLoginStatus] = useState<LoginStatus | null>(null)
 
   useEffect(() => {
     const checkLogin = async () => {
@@ -14,19 +20,27 @@ export function useIsLoggedIn() {
         
         if (response.ok) {
           const data = await response.json()
-          setIsLoggedIn(data.is_logged_in)
+          setLoginStatus(data)
         } else {
           console.warn('Login check failed with status:', response.status)
-          setIsLoggedIn(false)
+          setLoginStatus({
+            spotify_logged_in: false,
+            youtube_logged_in: false,
+            both_logged_in: false
+          })
         }
       } catch (error) {
         console.error('Error checking login status:', error)
-        setIsLoggedIn(false)
+        setLoginStatus({
+          spotify_logged_in: false,
+          youtube_logged_in: false,
+          both_logged_in: false
+        })
       }
     }
 
     checkLogin()
   }, [])
 
-  return isLoggedIn
+  return loginStatus
 }
