@@ -180,6 +180,9 @@ export const SpotifyToYouTubeTransfer = () => {
               <CardDescription className="text-gray-600 dark:text-gray-300 w-full text-center">
                 Paste your Spotify playlist URL below to get started
               </CardDescription>
+              <div className="mt-2 text-xs text-yellow-600 dark:text-yellow-300 w-full text-center">
+                Only the first 15 songs will be added due to YouTube API quota limits.
+              </div>
             </CardHeader>
 
             <CardContent className="space-y-6 flex flex-col items-center w-full">
