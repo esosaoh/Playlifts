@@ -67,3 +67,47 @@ class SpotifyClient(object):
         )
         
         return response.ok
+
+    def get_tracks_from_playlist(self, playlist_id):
+        tracks = []
+        limit = 100
+        offset = 0
+
+        while True:
+            url = f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks?limit={limit}&offset={offset}"
+            response = requests.get(
+                url,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {self.api_token}"
+                }
+            )
+            if response.status_code != 200:
+                raise Exception(f"Failed to get playlist tracks: {response.status_code} - {response.text}")
+
+            data = response.json()
+            items = data.get('items', [])
+
+            if not items:
+                break
+
+            for item in items:
+                track = item.get('track')
+                if not track:
+                    continue
+                track_name = track.get('name')
+                artists = track.get('artists', [])
+                artist_name = artists[0]['name'] if artists else None
+
+                if track_name and artist_name:
+                    tracks.append({
+                        'name': track_name,
+                        'artist': artist_name
+                    })
+
+            if data.get('next'):
+                offset += limit
+            else:
+                break
+
+        return tracks
