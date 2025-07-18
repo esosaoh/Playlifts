@@ -1,29 +1,42 @@
+import os
+import time
+import logging
+
+from dotenv import load_dotenv
 from celery import current_task
+from celery_config import celery
+from celery.exceptions import Ignore
+
 from youtube_client import YouTubeClient
 from spotify_client import SpotifyClient
-import os
-from dotenv import load_dotenv
-import time
-from celery_config import celery
 from google.oauth2.credentials import Credentials
 
 load_dotenv(override=True)
 
 YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY')
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
 @celery.task(bind=True)
 def transfer_playlist_task(self, access_token, playlist_id, target_playlist_id):
-    """Celery task to handle large playlist transfers"""
+    """
+    YouTube -> Spotify transfer.
+    access_token: Spotify *user* token (must have modify scopes).
+    playlist_id: YouTube playlist ID (source).
+    target_playlist_id: Spotify playlist ID (dest) OR None -> save to Liked Songs.
+    """
     try:
-        youtube_client = YouTubeClient(YOUTUBE_API_KEY)
-        spotify_client = SpotifyClient(access_token)
-        
+        youtube_client = YouTubeClient(api_key=YOUTUBE_API_KEY)
+        spotify_client = SpotifyClient(api_token=access_token)
+
         songs = youtube_client.get_videos_from_playlist(playlist_id)
         total_songs = len(songs)
-        
+
         successful_transfers = []
         failed_transfers = []
-        
+
         self.update_state(
             state='PROGRESS',
             meta={
@@ -33,18 +46,18 @@ def transfer_playlist_task(self, access_token, playlist_id, target_playlist_id):
                 'status': f'Starting transfer of {total_songs} songs...'
             }
         )
-        
+
         for i, song in enumerate(songs):
             try:
                 if i > 0 and i % 10 == 0:
-                    time.sleep(1)
-                
+                    time.sleep(1)  # basic rate pacing
+
                 spotify_song_data = spotify_client.search_song(song.artist, song.track)
                 if target_playlist_id:
                     success = spotify_client.add_song_to_playlist(spotify_song_data, target_playlist_id)
                 else:
                     success = spotify_client.add_song_to_spotify(spotify_song_data)
-                
+
                 if success:
                     successful_transfers.append({
                         'artist': spotify_song_data['artist'],
@@ -63,10 +76,9 @@ def transfer_playlist_task(self, access_token, playlist_id, target_playlist_id):
                     'track': song.track,
                     'reason': str(e)
                 })
-            
-            # Update progress every 2 songs for more responsive UI
+
             if i % 2 == 0 or i == total_songs - 1:
-                progress = (i + 1) / total_songs * 100
+                progress = (i + 1) / total_songs * 100 if total_songs else 100
                 self.update_state(
                     state='PROGRESS',
                     meta={
@@ -87,22 +99,28 @@ def transfer_playlist_task(self, access_token, playlist_id, target_playlist_id):
                 'songs': failed_transfers
             }
         }
-        
+
     except Exception as e:
-        self.update_state(
-            state='FAILURE',
-            meta={'error': str(e)}
-        )
+        logger.error(f"Task failed with error: {str(e)}", exc_info=True)
         raise
 
+
 @celery.task(bind=True)
-def transfer_spotify_to_youtube_task(self, spotify_access_token, spotify_playlist_id, youtube_playlist_id, youtube_token_data):
+def transfer_spotify_to_youtube_task(self, _unused_access_token, spotify_playlist_id, youtube_playlist_id, youtube_token_data):
     """
-    Transfer tracks from a Spotify playlist to a YouTube playlist.
-    youtube_token_data: dict containing YouTube OAuth credentials (token, refresh_token, client_id, client_secret, etc.)
+    Spotify -> YouTube transfer.
+    spotify_playlist_id: Source Spotify playlist (public).
+    youtube_playlist_id: Destination YouTube playlist (must belong to authorized user).
+    youtube_token_data: dict containing YouTube OAuth credentials (token, refresh_token, etc.).
     """
     try:
-        spotify_client = SpotifyClient(spotify_access_token)
+        logger.info(f"Starting Spotify to YouTube transfer: {spotify_playlist_id} -> {youtube_playlist_id}")
+        
+        spotify_client = SpotifyClient(api_token=None)  
+        
+        if not spotify_client.get_app_token():
+            raise Exception("Failed to get Spotify app token")
+        
         credentials = Credentials(
             token=youtube_token_data['token'],
             refresh_token=youtube_token_data.get('refresh_token'),
@@ -113,38 +131,68 @@ def transfer_spotify_to_youtube_task(self, spotify_access_token, spotify_playlis
         )
         youtube_client = YouTubeClient(credentials=credentials)
 
+        self.update_state(
+            state='PROGRESS',
+            meta={'current': 0, 'total': 0, 'progress': 0, 'status': 'Fetching Spotify playlist...'}
+        )
+
         tracks = spotify_client.get_tracks_from_playlist(spotify_playlist_id)
         total_tracks = len(tracks)
+        
+        logger.info(f"Found {total_tracks} tracks in Spotify playlist")
 
         successful = []
         failed = []
 
-        self.update_state(state='PROGRESS', meta={'current': 0, 'total': total_tracks, 'progress': 0, 'status': 'Starting transfer...'})
+        self.update_state(
+            state='PROGRESS',
+            meta={'current': 0, 'total': total_tracks, 'progress': 0, 'status': 'Starting transfer...'}
+        )
 
         for i, track in enumerate(tracks):
             try:
-                # Search YouTube for the song
                 query = f"{track['artist']} - {track['name']}"
-                search_results = youtube_client.search_videos(query)
+                logger.info(f"Searching YouTube for: {query}")
+                
+                search_results = youtube_client.search_videos(query, max_results=1)
                 if search_results:
-                    video_id = search_results[0]['videoId']  # assuming first result is best match
+                    video_id = search_results[0]['videoId']
                     youtube_client.add_video_to_playlist(youtube_playlist_id, video_id)
                     successful.append(track)
+                    logger.info(f"Successfully added: {query}")
                 else:
                     failed.append({'track': track, 'reason': 'No YouTube video found'})
+                    logger.warning(f"No YouTube video found for: {query}")
+                    
+                if i % 5 == 0:
+                    time.sleep(1)
+                    
             except Exception as e:
-                failed.append({'track': track, 'reason': str(e)})
+                error_msg = str(e)
+                failed.append({'track': track, 'reason': error_msg})
+                logger.error(f"Error processing track {query}: {error_msg}")
 
-            # Progress update every 2 tracks
             if i % 2 == 0 or i == total_tracks - 1:
-                progress = (i + 1) / total_tracks * 100
-                self.update_state(state='PROGRESS', meta={'current': i + 1, 'total': total_tracks, 'progress': progress, 'status': f'Processed {i+1}/{total_tracks} tracks'})
+                progress = (i + 1) / total_tracks * 100 if total_tracks else 100
+                self.update_state(
+                    state='PROGRESS',
+                    meta={
+                        'current': i + 1, 
+                        'total': total_tracks, 
+                        'progress': progress,
+                        'status': f'Processed {i + 1}/{total_tracks} tracks'
+                    }
+                )
 
-        return {
+        result = {
             'success': {'count': len(successful), 'tracks': successful},
             'failed': {'count': len(failed), 'tracks': failed}
         }
+        
+        logger.info(f"Transfer completed: {len(successful)} successful, {len(failed)} failed")
+        return result
 
     except Exception as e:
-        self.update_state(state='FAILURE', meta={'error': str(e)})
+        error_msg = str(e)
+        logger.error(f"Task failed with error: {error_msg}", exc_info=True)
         raise

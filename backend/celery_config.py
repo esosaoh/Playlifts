@@ -17,13 +17,22 @@ def make_celery():
         result_serializer='json',
         timezone='UTC',
         enable_utc=True,
+        
+        task_reject_on_worker_lost=True,
+        task_acks_late=True,
+        worker_prefetch_multiplier=1,
+        
+        result_expires=3600,  
+        result_persistent=True,
+        
+        task_track_started=True,
+        task_send_sent_event=True,
     )
     
     return celery
 
 celery = make_celery()
 
-# Import tasks after celery app is created to ensure proper registration
 try:
     import tasks
 except ImportError as e:
