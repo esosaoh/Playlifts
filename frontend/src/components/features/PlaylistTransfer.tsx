@@ -5,7 +5,7 @@ import { SongPreview } from "./SongPreview";
 import { PlaylistSelector } from "./PlaylistSelector";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/Card";
 import { motion } from "framer-motion";
-import { Music, Youtube, Music2, Heart } from "lucide-react";
+import { Youtube, Music2, Heart } from "lucide-react";
 
 export const PlaylistTransfer = () => {
   const [url, setUrl] = useState("");

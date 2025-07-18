@@ -5,7 +5,7 @@ import { SpotifyPlaylistSelector } from "./SpotifyPlaylistSelector";
 import { YouTubePlaylistSelector } from "./YouTubePlaylistSelector";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/Card";
 import { motion } from "framer-motion";
-import { Music, Youtube, Music2 } from "lucide-react";
+import { Youtube, Music2 } from "lucide-react";
 
 export const SpotifyToYouTubeTransfer = () => {
   const [selectedSpotifyPlaylistId, setSelectedSpotifyPlaylistId] = useState<string | null>(null);
