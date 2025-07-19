@@ -1,67 +1,242 @@
 # Playlifts
 
-A full-stack web application for transferring tracks from YouTube playlists to Spotify.
+Playlifts is a web application that allows users to transfer their music playlists between YouTube Music and Spotify.
 
-## Overview
+**🌐 Live Application**: [playlifts.com](https://playlifts.com)  
+**🔧 API Endpoint**: [api.playlifts.com](https://api.playlifts.com)
 
-**Playlifts** is a web application that allows users to transfer songs from their YouTube playlists to their Spotify libraries seamlessly. It integrates both the YouTube and Spotify APIs, enabling users to fetch, search, and add tracks to their Spotify accounts with ease.
+![Playlifts Login Page](docs/screenshots/login-page.png)
 
 ## Features
 
-- **Spotify Playlist Transfer**: Fetch tracks from your public YouTube playlists and add them to your Spotify library
-- **Playlist Management**: Search for tracks on Spotify and create or modify your personal playlists
-- **User Authentication**: Secure OAuth-based authentication for Spotify users to log in and manage their music collections
+- **Bidirectional Transfer**: Transfer playlists from YouTube Music to Spotify and vice versa
+- **Song Matching**: Intelligent matching between platforms using artist and track names
+- **Large Playlist Support**: Handle playlists of any size through asynchronous processing
+- **Real-time Progress**: Live progress tracking during transfers
+- **Error Handling**: Comprehensive error reporting and retry mechanisms
+- **Modern UI**: Beautiful, responsive interface with dark/light mode support
+- **OAuth Integration**: Secure authentication with both platforms
 
 ## Tech Stack
 
-- **Backend**: Python (Flask, Celery), Redis, MySQL, Spotify API, YouTube Data API
-- **Frontend**: React.js, TypeScript, Tailwind CSS
-- **Authentication**: OAuth 2.0 with Spotify
-- **Containerization**: Docker, Docker Compose, Nginx
+### Frontend
+- **React 18** 
+- **TypeScript** 
+- **Vite**
+- **Tailwind CSS**
+- **Framer Motion** 
+- **React Router** 
+- **Lucide React** 
+- **React Testing Library** 
 
-## Prerequisites
+### Backend
+- **Flask** 
+- **Celery**
+- **Redis** 
+- **SQLAlchemy** 
+- **MySQL** 
+- **unittest** 
 
+### Infrastructure
+- **Docker** 
+- **Docker Compose** 
+- **Nginx** 
+- **AWS EC2** 
+- **Vercel** 
+
+### APIs & Services
+- **Spotify Web API** 
+- **YouTube Data API** 
+- **Google OAuth 2.0** 
+- **Spotify OAuth 2.0** 
+
+## Architecture
+
+### Why Celery?
+
+Processing playlists with hundreds of songs directly in API requests would cause timeouts. Both Spotify and YouTube APIs have rate limits that require careful pacing. Celery's asynchronous processing allows users to continue using the app while transfers happen in the background. Additionaly, failed transfers can be retried without affecting the user interface and multiple transfers can run concurrently without blocking each other.
+
+### System Flow
+
+1. **User Authentication**: OAuth 2.0 flow with Spotify and YouTube Music
+2. **Playlist Selection**: Users browse and select source playlists
+3. **Transfer Initiation**: Celery task is queued for processing
+4. **Background Processing**: Songs are matched and transferred asynchronously
+5. **Progress Updates**: Real-time status updates via WebSocket-like polling
+6. **Completion**: Results are stored and displayed to the user
+
+## Screenshots
+
+### Login Experience
+![Login Page](docs/screenshots/login-page.png)
+*Clean, modern login interface with dual authentication options*
+
+### YouTube to Spotify Transfer
+![YouTube to Spotify Transfer](docs/screenshots/youtube-to-spotify.png)
+*Transferring playlists from YouTube Music to Spotify with real-time progress*
+
+### Spotify Playlist Selection
+![Spotify Playlist Selection](docs/screenshots/spotify-playlist-selection.png)
+*Browsing and selecting Spotify playlists for transfer*
+
+### Authentication States
+![Only Logged in with Spotify](docs/screenshots/only-logged-in-with-spotify.png)
+*Interface when user is only authenticated with Spotify*
+
+![Only Logged in with YouTube](docs/screenshots/only-logged-in-with-youtube.png)
+*Interface when user is only authenticated with YouTube Music*
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.9+
+- Node.js 18+
 - Docker and Docker Compose
-- Spotify Developer Account
-- YouTube Data API v3 Credentials
+- Redis server
+- MySQL database
 
-## Setup Instructions
+### Local Development Setup
 
-### 1. Clone the Repository
-
+#### 1. Clone the Repository
 ```bash
-git clone https://github.com/esosaoh/Playlifts.git
-cd Playlifts
+git clone https://github.com/esosaoh/playlifts.git
+cd playlifts
 ```
 
-### 2. Configure Environment Variables
-
-Create a `.env` file in the root directory:
-
-```plaintext
-SPOTIFY_CLIENT_ID=your_spotify_client_id
-SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
-YOUTUBE_API_KEY=your_youtube_api_key
-```
-
-### 3. Build and Run with Docker
-
+#### 2. Backend Setup
 ```bash
-# Build and start all services
-docker-compose up --build
-
-# To run in detached mode
-docker-compose up -d
+cd backend
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
-### 5. Access the application
+#### 3. Environment Configuration
+> 📖 **Backend Configuration**: See [backend/README.md](backend/README.md) for detailed environment variables and API setup instructions.
 
-1. Frontend: http://localhost:5173
-2. Backend API: http://localhost:8889
+Create `.env` files in both `backend/` and `frontend/` directories:
 
-## Usage
+**Frontend (.env)**
+```env
+VITE_API_URL=http://localhost:5000
+```
 
-1. Open the web application in your browser
-2. Log in with your Spotify account
-3. Select a YouTube playlist to transfer
-4. Review and add tracks to your Spotify playlists
+#### 4. Start Services
+```bash
+# Start Celery worker
+cd backend
+celery -A celery_config worker --loglevel=info
+
+# Start Flask backend
+flask run
+
+# Start React frontend (in new terminal)
+cd frontend
+npm install
+npm run dev
+```
+
+### API Access Setup
+
+> ⚠️ **Important**: Due to Spotify's API policy changes, individual developers can no longer create public apps. Users must be manually added to your Spotify app.
+
+> 📖 **Detailed Setup**: For complete API configuration instructions, see [backend/README.md](backend/README.md).
+
+#### Spotify Setup
+1. Create a Spotify app in the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
+2. Add your redirect URI: `http://localhost:8889/spotify/callback`
+3. **Manually add users** to your app through the dashboard
+4. Users will need to contact you to be added to the app
+
+#### YouTube Setup
+1. Create a Google Cloud project
+2. Enable YouTube Data API v3
+3. Create OAuth 2.0 credentials
+4. Add your redirect URI: `http://localhost:8889/youtube/callback`
+
+> 💡 **Tip**: For local development, you can use the YouTube API with generous quotas, but be mindful of rate limits for production use.
+
+## Testing
+
+### Frontend Testing
+```bash
+cd frontend
+npm test                    # Run tests in watch mode
+npm run test:run           # Run tests once
+npm run test:ui            # Run tests with UI (if @vitest/ui installed)
+```
+
+**Test Coverage:**
+- Component rendering and user interactions
+- API integration with mocked responses
+- Error handling and loading states
+- Navigation and routing
+- Form validation and submission
+
+### Backend Testing
+```bash
+cd backend
+python -m pytest tests/    # Run all tests
+python -m pytest tests/ -v # Verbose output
+python -m pytest tests/ -k "test_name" # Run specific test
+```
+
+**Test Coverage:**
+- API endpoints and authentication
+- Celery task processing
+- Database operations
+- Error handling and edge cases
+- Spotify and YouTube client integrations
+
+## Deployment
+
+> 📖 **Deployment Configuration**: See [./DEPLOYMENT.md](DEPLOYMENT.md) for detailed environment variables and API setup instructions.
+
+### Production Deployment
+```bash
+# Deploy to AWS EC2
+./scripts/deploy.sh
+```
+
+### Environment Variables
+Ensure all production environment variables are set:
+- Database credentials
+- API keys and secrets
+- Redis connection
+- Domain and SSL certificates
+
+> 📖 **Backend API Documentation**: For complete API endpoint documentation, see [backend/README.md](backend/README.md).
+
+## API Limitations & Considerations
+
+### Spotify API
+- **Rate Limits**: 100 requests per second per user
+- **Playlist Limits**: 10,000 tracks per playlist
+- **App Approval**: Manual user addition required
+
+### YouTube Data API
+- **Daily Quota**: 10,000 units per day (free tier)
+- **Search Quota**: 100 units per search request
+- **Rate Limits**: 300 requests per 100 seconds per user
+
+> 💡 **Local Development Advantage**: Local development allows you to work with your own API quotas and test thoroughly before production deployment.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Development Guidelines
+- Write tests for new features
+- Follow the existing code style
+- Update documentation as needed
+- Test thoroughly with both platforms
+
+## License
+
+This project is licensed under the GNU GPL License - see the [LICENSE](LICENSE) file for details.
+
