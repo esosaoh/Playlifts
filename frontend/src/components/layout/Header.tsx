@@ -36,7 +36,7 @@ export const Header = () => {
           <Link to="/privacy-policy" className="hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
             Privacy Policy
           </Link>
-          <Link to="/terms-of-service" className="hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+          <Link to="/terms" className="hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
             Terms of Service
           </Link>
         </div>
