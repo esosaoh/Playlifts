@@ -178,7 +178,7 @@ export const PrivacyPolicy = () => {
                 If you have any questions about this Privacy Policy or our data practices, please contact us:
               </p>
               <ul className="list-disc pl-6 text-gray-700 dark:text-gray-300 mb-4">
-                <li><strong>Email:</strong> privacy@playlifts.com</li>
+                <li><strong>Email:</strong> esosaohangbonswe@gmail.com</li>
                 <li><strong>Website:</strong> <a href="https://playlifts.com" className="text-blue-600 dark:text-blue-400 hover:underline">playlifts.com</a></li>
               </ul>
             </section>

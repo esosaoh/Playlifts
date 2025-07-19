@@ -34,10 +34,10 @@ export const Header = () => {
         {/* Footer Links */}
         <div className="flex space-x-4 text-sm text-gray-600 dark:text-gray-400">
           <Link to="/privacy-policy" className="hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
-            Privacy
+            Privacy Policy
           </Link>
-          <Link to="/terms" className="hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
-            Terms
+          <Link to="/terms-of-service" className="hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+            Terms of Service
           </Link>
         </div>
         <button
