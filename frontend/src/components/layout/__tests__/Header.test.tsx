@@ -44,6 +44,6 @@ describe('Header', () => {
   it('terms link goes to terms page', () => {
     render(<Header />)
     const termsLink = screen.getByText('Terms of Service')
-    expect(termsLink).toHaveAttribute('href', '/terms-of-service')
+    expect(termsLink).toHaveAttribute('href', '/terms')
   })
 }) 
