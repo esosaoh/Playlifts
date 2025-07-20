@@ -1,9 +1,9 @@
-# Playlifts
+# [Playlifts](https://playlifts.com)
 
 Playlifts is a web application that allows users to transfer their music playlists between YouTube Music and Spotify.
 
-**🌐 Live Application**: [playlifts.com](https://playlifts.com)  
-**🔧 API Endpoint**: [api.playlifts.com](https://api.playlifts.com)
+**Live Application**: [playlifts.com](https://playlifts.com)  
+**Playlifts API**: [api.playlifts.com](https://api.playlifts.com)
 
 ![Playlifts Login Page](docs/screenshots/login-page.png)
 
@@ -113,7 +113,7 @@ pip install -r requirements.txt
 ```
 
 #### 3. Environment Configuration
-> 📖 **Backend Configuration**: See [backend/README.md](backend/README.md) for detailed environment variables and API setup instructions.
+> **Backend Configuration**: See [backend/README.md](backend/README.md) for detailed environment variables and API setup instructions.
 
 Create `.env` files in both `backend/` and `frontend/` directories:
 
@@ -139,9 +139,10 @@ npm run dev
 
 ### API Access Setup
 
-> ⚠️ **Important**: Due to Spotify's API policy changes, individual developers can no longer create public apps. Users must be manually added to your Spotify app.
+> [!IMPORTANT]  
+> Due to [Spotify's API policy changes](https://developer.spotify.com/blog/2025-04-15-updating-the-criteria-for-web-api-extended-access), individual developers can no longer create public apps. Users must be manually added to your Spotify app.
 
-> 📖 **Detailed Setup**: For complete API configuration instructions, see [backend/README.md](backend/README.md).
+> **Detailed Setup**: For complete API configuration instructions, see [backend/README.md](backend/README.md).
 
 #### Spotify Setup
 1. Create a Spotify app in the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
@@ -155,7 +156,8 @@ npm run dev
 3. Create OAuth 2.0 credentials
 4. Add your redirect URI: `http://localhost:8889/youtube/callback`
 
-> 💡 **Tip**: For local development, you can use the YouTube API with generous quotas, but be mindful of rate limits for production use.
+> [!TIP]  
+> For local development, you can use the YouTube API with generous quotas, but be mindful of rate limits for production use.
 
 ## Testing
 
@@ -191,7 +193,7 @@ python -m pytest tests/ -k "test_name" # Run specific test
 
 ## Deployment
 
-> 📖 **Deployment Configuration**: See [./DEPLOYMENT.md](DEPLOYMENT.md) for detailed environment variables and API setup instructions.
+> **Deployment Configuration**: See [./DEPLOYMENT.md](DEPLOYMENT.md) for detailed environment variables and API setup instructions.
 
 ### Production Deployment
 ```bash
@@ -206,7 +208,7 @@ Ensure all production environment variables are set:
 - Redis connection
 - Domain and SSL certificates
 
-> 📖 **Backend API Documentation**: For complete API endpoint documentation, see [backend/README.md](backend/README.md).
+> **Backend API Documentation**: For complete API endpoint documentation, see [backend/README.md](backend/README.md).
 
 ## API Limitations & Considerations
 
@@ -220,7 +222,7 @@ Ensure all production environment variables are set:
 - **Search Quota**: 100 units per search request
 - **Rate Limits**: 300 requests per 100 seconds per user
 
-> 💡 **Local Development Advantage**: Local development allows you to work with your own API quotas and test thoroughly before production deployment.
+> **Local Development Advantage**: Local development allows you to work with your own API quotas and test thoroughly before production deployment.
 
 ## Contributing
 
