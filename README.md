@@ -232,12 +232,6 @@ Ensure all production environment variables are set:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-### Development Guidelines
-- Write tests for new features
-- Follow the existing code style
-- Update documentation as needed
-- Test thoroughly with both platforms
-
 ## License
 
 This project is licensed under the GNU GPL License - see the [LICENSE](LICENSE) file for details.
