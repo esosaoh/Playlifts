@@ -170,7 +170,7 @@ def transfer_spotify_to_youtube_task(self, _unused_access_token, spotify_playlis
             except Exception as e:
                 error_msg = str(e)
                 failed.append({'track': track, 'reason': error_msg})
-                logger.error(f"Error processing track {query}: {error_msg}")
+                logger.error(f"Error processing track {track.get('name', 'Unknown')} by {track.get('artist', 'Unknown')}: {error_msg}")
 
             if i % 2 == 0 or i == total_tracks - 1:
                 progress = (i + 1) / total_tracks * 100 if total_tracks else 100
