@@ -68,8 +68,12 @@ export const SpotifyToYouTubeTransfer = () => {
         pollTaskStatus(data.task_id);
       } else if (res.ok) {
         const allSongs = [
-          ...data.success.songs.map((s: any) => ({ ...s, status: "success" })),
-          ...data.failed.songs.map((s: any) => ({ ...s, status: "failed", reason: s.reason })),
+          ...data.success.tracks.map((s: any) => ({ ...s, status: "success" })),
+          ...data.failed.tracks.map((s: any) => ({ 
+            ...s.track, 
+            status: "failed", 
+            reason: s.reason 
+          })),
         ];
         setSongs(allSongs);
         
@@ -118,7 +122,11 @@ export const SpotifyToYouTubeTransfer = () => {
           const result = data.result;
           const allSongs = [
             ...result.success.tracks.map((s: any) => ({ ...s, status: "success" })),
-            ...result.failed.tracks.map((s: any) => ({ ...s, status: "failed", reason: s.reason })),
+            ...result.failed.tracks.map((s: any) => ({ 
+              ...s.track, 
+              status: "failed", 
+              reason: s.reason 
+            })),
           ];
           setSongs(allSongs);
           
