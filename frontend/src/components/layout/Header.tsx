@@ -33,12 +33,12 @@ export const Header = () => {
       <div className="flex items-center gap-4">
         {/* Footer Links */}
         <div className="flex space-x-4 text-sm text-gray-600 dark:text-gray-400">
-          <Link to="/privacy-policy" className="hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+          <a href="https://playlifts.com/privacy-policy" className="hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
             Privacy Policy
-          </Link>
-          <Link to="/terms" className="hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+          </a>
+          <a href="https://playlifts.com/terms" className="hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
             Terms of Service
-          </Link>
+          </a>
         </div>
         <button
           aria-label="Toggle theme"

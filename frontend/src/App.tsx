@@ -111,10 +111,10 @@ function LoginPage() {
 
         {/* Footer Links */}
         <div className="flex justify-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
-          <a href="/privacy-policy" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
+          <a href="https://playlifts.com/privacy-policy" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
             Privacy Policy
           </a>
-          <a href="/terms" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
+          <a href="https://playlifts.com/terms" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
             Terms of Service
           </a>
         </div>
