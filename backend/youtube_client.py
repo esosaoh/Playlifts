@@ -12,6 +12,9 @@ class Song(object):
     def __init__(self, artist, track):
         self.artist = artist
         self.track = track
+    
+    def __str__(self):
+        return f"{self.artist} - {self.track}"
 
 
 class YouTubeClient(object):
