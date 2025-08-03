@@ -15,9 +15,8 @@ __url__ = "https://github.com/esosaoh/Playlifts"
 
 # Package imports
 from .app import app
-from .models import *
-from .spotify_client import SpotifyClient
-from .youtube_client import YouTubeClient
+from .clients.spotify_client import SpotifyClient
+from .clients.youtube_client import YouTubeClient
 
 __all__ = [
     "app",

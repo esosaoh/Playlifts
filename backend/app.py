@@ -1,5 +1,4 @@
 import os
-import time
 import urllib.parse
 import requests
 
@@ -9,11 +8,11 @@ from datetime import datetime
 from dotenv import load_dotenv
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from config import app
-from celery_config import celery
+from backend.config.config import app
+from backend.config.celery_config import celery
 from tasks import transfer_playlist_task, transfer_spotify_to_youtube_task
-from youtube_client import YouTubeClient
-from spotify_client import SpotifyClient
+from backend.clients.youtube_client import YouTubeClient
+from backend.clients.spotify_client import SpotifyClient
 
 from google_auth_oauthlib.flow import Flow
 from google.oauth2.credentials import Credentials
