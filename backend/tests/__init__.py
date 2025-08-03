@@ -22,25 +22,25 @@ Test Categories:
 Usage:
     # Run all tests
     pytest backend/tests/
-    
+
     # Run specific test file
     pytest backend/tests/test_app.py
-    
+
     # Run tests with coverage
     pytest backend/tests/ --cov=backend --cov-report=html
-    
+
     # Run only unit tests
     pytest backend/tests/ -m unit
-    
+
     # Run only integration tests
     pytest backend/tests/ -m integration
-    
+
     # Run only API tests
     pytest backend/tests/ -m api
-    
+
     # Skip slow tests
     pytest backend/tests/ -m "not slow"
 """
 
 __version__ = "1.0.0"
-__author__ = "esosaoh" 
+__author__ = "esosaoh"
