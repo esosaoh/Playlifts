@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from youtube_client import YouTubeClient, Playlist, Song
+from backend.clients.youtube_client import YouTubeClient, Playlist, Song
 
 
 class TestYouTubeClientInitialization:

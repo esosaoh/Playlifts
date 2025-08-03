@@ -4,7 +4,7 @@ Simplified tests for core task functionality (without Celery decorators).
 
 import pytest
 from unittest.mock import Mock, MagicMock, patch
-from youtube_client import Song
+from backend.clients.youtube_client import Song
 
 
 class TestPlaylistTransferLogic:
@@ -23,8 +23,8 @@ class TestPlaylistTransferLogic:
         self, mock_spotify_client_class, mock_youtube_client_class
     ):
         """Test the core YouTube to Spotify transfer logic."""
-        from youtube_client import YouTubeClient
-        from spotify_client import SpotifyClient
+        from backend.clients.youtube_client import YouTubeClient
+        from backend.clients.spotify_client import SpotifyClient
 
         # Mock YouTube client
         mock_youtube_client = MagicMock()
@@ -87,8 +87,8 @@ class TestPlaylistTransferLogic:
     @patch("tasks.SpotifyClient")
     def test_spotify_to_youtube_core_logic(self, mock_spotify_client_class):
         """Test the core Spotify to YouTube transfer logic."""
-        from spotify_client import SpotifyClient
-        from youtube_client import YouTubeClient
+        from backend.clients.spotify_client import SpotifyClient
+        from backend.clients.youtube_client import YouTubeClient
 
         # Mock Spotify client
         mock_spotify_client = MagicMock()
@@ -143,7 +143,7 @@ class TestTaskImports:
     def test_import_youtube_client(self):
         """Test importing YouTubeClient and Song."""
         try:
-            from youtube_client import YouTubeClient, Song
+            from backend.clients.youtube_client import YouTubeClient, Song
 
             assert YouTubeClient is not None
             assert Song is not None
@@ -153,7 +153,7 @@ class TestTaskImports:
     def test_import_spotify_client(self):
         """Test importing SpotifyClient."""
         try:
-            from spotify_client import SpotifyClient
+            from backend.clients.spotify_client import SpotifyClient
 
             assert SpotifyClient is not None
         except ImportError as e:

@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from spotify_client import SpotifyClient
+from backend.clients.spotify_client import SpotifyClient
 
 
 class TestSpotifyClientInitialization:
