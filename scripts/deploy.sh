@@ -1,10 +1,28 @@
 #!/bin/bash
 set -e
 
+cd "$(dirname "$0")/.."
+
 source ./backend/.env  
 
 echo ">>> Copying files to EC2..."
-scp -i "$KEY_PATH" -r backend deployment Dockerfile.* docker-compose.yml scripts "$EC2_USER@$EC2_HOST:$REMOTE_DIR/playlifts"
+rsync -avz --progress \
+  --exclude 'backend/venv/' \
+  --exclude 'backend/__pycache__/' \
+  --exclude 'backend/.pytest_cache/' \
+  --exclude 'backend/.DS_Store' \
+  --exclude 'backend/*.pyc' \
+  --exclude 'backend/*.pyo' \
+  --exclude 'backend/.env' \
+  --exclude 'backend/tests/' \
+  --exclude 'backend/.coverage' \
+  --exclude 'backend/htmlcov/' \
+  --exclude 'backend/creds/' \
+  --exclude '**/__pycache__/' \
+  --exclude '**/.DS_Store' \
+  -e "ssh -i $KEY_PATH" \
+  backend/ deployment/ Dockerfile.* docker-compose.yml scripts/ \
+  "$EC2_USER@$EC2_HOST:$REMOTE_DIR/playlifts/"
 
 echo ">>> Restarting backend Docker container..."
 
