@@ -33,9 +33,7 @@ Playlifts is a web application that allows users to transfer their music playlis
 - **Flask** 
 - **Celery**
 - **Redis** 
-- **SQLAlchemy** 
-- **MySQL** 
-- **unittest** 
+- **pytest** 
 
 ### Infrastructure
 - **Docker** 
@@ -52,6 +50,8 @@ Playlifts is a web application that allows users to transfer their music playlis
 
 ## Architecture
 
+<img src="docs/screenshots/playlifts_architecture.png" alt="Playlifts Architecture" width="600">
+
 ### Why Celery?
 
 Processing playlists with hundreds of songs directly in API requests would cause timeouts. Both Spotify and YouTube APIs have rate limits that require careful pacing. Celery's asynchronous processing allows users to continue using the app while transfers happen in the background. Additionaly, failed transfers can be retried without affecting the user interface and multiple transfers can run concurrently without blocking each other.
@@ -66,10 +66,6 @@ Processing playlists with hundreds of songs directly in API requests would cause
 6. **Completion**: Results are stored and displayed to the user
 
 ## Screenshots
-
-### Login Experience
-![Login Page](docs/screenshots/login-page.png)
-*Clean, modern login interface with dual authentication options*
 
 ### YouTube to Spotify Transfer
 ![YouTube to Spotify Transfer](docs/screenshots/youtube-to-spotify.png)
@@ -94,7 +90,6 @@ Processing playlists with hundreds of songs directly in API requests would cause
 - Node.js 18+
 - Docker and Docker Compose
 - Redis server
-- MySQL database
 
 ### Local Development Setup
 
@@ -227,10 +222,11 @@ Ensure all production environment variables are set:
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Ensure your code is formatted (we use `black` for backend and `prettier` for frontend)
+4. Commit your changes 
+5. Push to the branch
+6. Open a Pull Request
 
 ## License
 
