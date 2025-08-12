@@ -4,11 +4,11 @@ import logging
 
 from dotenv import load_dotenv
 from celery import current_task
-from backend.config.celery_config import celery
+from config.celery_config import celery
 from celery.exceptions import Ignore
 
-from backend.clients.youtube_client import YouTubeClient
-from backend.clients.spotify_client import SpotifyClient
+from clients.youtube_client import YouTubeClient
+from clients.spotify_client import SpotifyClient
 from google.oauth2.credentials import Credentials
 
 load_dotenv(override=True)
